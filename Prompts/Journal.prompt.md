@@ -30,7 +30,7 @@ Each reflection is a guided conversation—the AI asks adaptive questions, you r
 For manual/non-conversational journaling:
 
 ```bash
-# Start a new entry in editor
+# Start a new entry
 python3 scripts/journal.py new morning_pages
 python3 scripts/journal.py new evening
 python3 scripts/journal.py new gratitude
@@ -78,4 +78,5 @@ Schema:
 ## Reflection Prompts Location
 
 `Prompts/reflections/` contains the guided interview rubrics for each reflection type.
+
 

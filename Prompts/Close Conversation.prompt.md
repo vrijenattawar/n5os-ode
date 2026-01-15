@@ -145,16 +145,14 @@ Review the recommendation. Override with `--tier=N` if needed.
 
 ## Full Step 2: Execute Mechanical Close
 
+For n5OS-Ode tier 1 (quick):
+
 ```bash
-# Tier 1
-python3 N5/scripts/conversation_end_quick.py --convo-id {CONVO_ID}
-
-# Tier 2
-python3 N5/scripts/conversation_end_standard.py --convo-id {CONVO_ID}
-
-# Tier 3
-python3 N5/scripts/conversation_end_full.py --convo-id {CONVO_ID}
+# Print recommendation
+python3 N5/scripts/conversation_end_router.py --convo-id {CONVO_ID} --tier 1
 ```
+
+In a full N5 system, multiple tier scripts exist. Here, use tier detection to decide scope.
 
 ## Full Step 3: PII Audit
 
@@ -318,4 +316,5 @@ Present formatted close output. End with:
 - **v3.2** (2026-01-14): Added PII Audit step
 - **v3.1** (2026-01-13): Added Commit Target Suggestions
 - **v3.0** (2026-01-12): AAR generation moved to Librarian
+
 

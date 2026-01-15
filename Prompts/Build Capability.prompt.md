@@ -43,6 +43,7 @@ User says: "I want to build a meeting summarizer capability"
 
 ## Reference
 
-- Template: `templates/build/plan_template.md`
-- Guide: `docs/BUILD_PLANNING_GUIDE.md`
+- **Scripts:** `file 'scripts/init_build.py'` creates the build folder structure
+- **Guide:** `file 'docs/PHILOSOPHY.md'` for build philosophy
+
 
