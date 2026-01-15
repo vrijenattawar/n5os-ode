@@ -1,0 +1,31 @@
+{
+  "version": "1.0",
+  "state": {
+    "✅": "complete",
+    "⏸️": "paused",
+    "‼️": "critical",
+    "🚧": "in-progress",
+    "❌": "failed"
+  },
+  "type": {
+    "📌": "normal",
+    "🐙": "orchestrator",
+    "👷🏽‍♂️": "worker",
+    "🔗": "linked"
+  },
+  "content": {
+    "🏗️": "build",
+    "🔎": "research",
+    "🛠️": "repair",
+    "🕸️": "site",
+    "🪵": "log",
+    "✍️": "content",
+    "🪞": "reflection",
+    "🤳": "social",
+    "📊": "data",
+    "💬": "comms",
+    "🗂️": "organize",
+    "📝": "planning"
+  }
+}
+

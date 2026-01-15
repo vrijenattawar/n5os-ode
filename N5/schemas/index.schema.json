@@ -1,0 +1,36 @@
+{
+  "version": "1.0",
+  "title": "n5OS-Ode Index Schema",
+  "description": "Schema for core n5OS-Ode data structures",
+  "definitions": {
+    "conversation": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "pattern": "^con_[A-Za-z0-9]+$" },
+        "type": { "type": "string", "enum": ["discussion", "build", "research", "reflection", "orchestrator"] },
+        "status": { "type": "string", "enum": ["active", "complete", "paused"] },
+        "created": { "type": "string", "format": "date-time" },
+        "last_updated": { "type": "string", "format": "date-time" }
+      }
+    },
+    "artifact": {
+      "type": "object",
+      "properties": {
+        "path": { "type": "string" },
+        "type": { "type": "string" },
+        "created": { "type": "string", "format": "date-time" },
+        "owner_conversation": { "type": "string" }
+      }
+    },
+    "block": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "pattern": "^B[0-9]{2}$" },
+        "title": { "type": "string" },
+        "content": { "type": "string" },
+        "version": { "type": "string" }
+      }
+    }
+  }
+}
+

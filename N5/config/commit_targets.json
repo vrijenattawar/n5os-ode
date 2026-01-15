@@ -1,0 +1,30 @@
+{
+  "targets": [
+    {
+      "name": "Learning Profile",
+      "description": "Concepts learned, key insights",
+      "path": "Knowledge/learning-log.md"
+    },
+    {
+      "name": "Content Library",
+      "description": "Articles saved and ingested",
+      "path": "Knowledge/content-library/"
+    },
+    {
+      "name": "Voice Library",
+      "description": "Distinctive phrases, linguistic primitives",
+      "path": "Knowledge/voice-library/"
+    },
+    {
+      "name": "Positions",
+      "description": "Worldview claims and beliefs",
+      "path": "Knowledge/positions.md"
+    },
+    {
+      "name": "Git",
+      "description": "Code changes and commits",
+      "path": ""
+    }
+  ]
+}
+
