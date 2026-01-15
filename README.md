@@ -1,0 +1,236 @@
+---
+created: 2026-01-15
+last_edited: 2026-01-15
+version: 1.0
+provenance: worker_006_documentation
+---
+
+# N5OS Ode
+
+**A cognitive operating system for Zo Computer**
+
+N5OS Ode transforms Zo from a general-purpose AI assistant into a structured thinking partner. It gives your AI memory, specialized modes of operation, and workflows that evolve with you.
+
+---
+
+## What Is This?
+
+Think of N5OS Ode as firmware for your AI. Out of the box, Zo is a powerful but generic assistant. N5OS Ode adds:
+
+- **Specialist Personas** — 6 focused modes (Builder, Researcher, Writer, Strategist, Debugger, Operator) that excel at different work types
+- **Behavioral Rules** — Persistent instructions that shape AI behavior across all conversations
+- **Conversation State** — Memory that persists across long sessions
+- **Structured Outputs** — Block generators that transform transcripts into actionable intelligence
+- **Journaling System** — Guided reflection workflows for personal insights
+- **Safety Rails** — Protection mechanisms that prevent data loss
+
+---
+
+## Quick Start
+
+### 1. Run the Bootloader
+
+Open a new Zo conversation and invoke:
+
+```
+@BOOTLOADER.prompt.md
+```
+
+The bootloader will:
+- Install 6 specialist personas
+- Create 6 core behavioral rules  
+- Set up the folder structure (N5/, Knowledge/, Records/, Prompts/)
+- Initialize configuration files
+
+Takes about 2-3 minutes.
+
+### 2. Personalize
+
+After installation, run:
+
+```
+@PERSONALIZE.prompt.md
+```
+
+This wizard collects:
+- Your name and timezone
+- Work context (what you do)
+- Communication preferences
+
+Your AI will adapt its behavior to match.
+
+### 3. Start Using
+
+You're ready. Some things to try:
+
+**Journal Entry**
+```
+@Journal
+```
+Start a guided reflection session.
+
+**Build Something**
+```
+@Build Capability
+I want to create a script that backs up my files daily
+```
+Activates structured planning and execution.
+
+**Use Personas**
+```
+Switch to Researcher and find recent papers on AI safety
+```
+Routes to the research specialist.
+
+---
+
+## Features Overview
+
+### Specialist Personas
+
+| Persona | Best For |
+|---------|----------|
+| **Operator** | Navigation, routing, state tracking (default) |
+| **Builder** | Scripts, automations, implementations |
+| **Researcher** | Web search, documentation, synthesis |
+| **Writer** | Emails, docs, polished content |
+| **Strategist** | Decisions, frameworks, planning |
+| **Debugger** | Troubleshooting, QA, root cause analysis |
+
+→ See [docs/PERSONAS.md](docs/PERSONAS.md) for full details
+
+### Behavioral Rules
+
+6 core rules that shape AI behavior:
+
+1. **Session State** — Tracks conversation context automatically
+2. **Frontmatter** — Adds provenance to all markdown files
+3. **P15 (Progress)** — Prevents false "done" claims
+4. **File Protection** — Guards critical directories
+5. **Debug Logging** — Breaks failure loops
+6. **Clarifying Questions** — Reduces mistakes from ambiguity
+
+→ See [docs/RULES.md](docs/RULES.md) for full details
+
+### Block System
+
+Transform meeting transcripts into structured intelligence:
+
+- **B01** — Detailed recap
+- **B02** — Commitments extracted
+- **B03** — Decisions made
+- **B04** — Open questions
+- **B05** — Questions raised
+- **B06** — Business context
+
+Plus reflection blocks (R01, R02, R06) for journaling.
+
+→ See [docs/BLOCK_SYSTEM.md](docs/BLOCK_SYSTEM.md) for full details
+
+### Semantic Memory (Optional)
+
+If you have an OpenAI API key, N5OS Ode can build a semantic memory layer:
+
+- Auto-indexes Knowledge/ content
+- Enables similarity search across your notes
+- Provides context-aware retrieval
+
+→ See [docs/SEMANTIC_MEMORY.md](docs/SEMANTIC_MEMORY.md) for setup
+
+---
+
+## Requirements
+
+- **Zo Computer account** — [zo.computer](https://zo.computer)
+- **Fresh workspace** — Works best on new or clean workspaces
+- **OpenAI API key** — Optional, for semantic memory features
+
+---
+
+## File Structure
+
+After installation:
+
+```
+workspace/
+├── N5/                      # System intelligence
+│   ├── prefs/               # Preferences and config
+│   ├── scripts/             # Utility scripts
+│   └── cognition/           # Semantic memory (optional)
+├── Knowledge/               # Long-term reference
+│   └── content-library/     # Ingested articles and notes
+├── Records/                 # Date-organized records
+│   └── journal/             # Journal entries
+├── Prompts/                 # Reusable workflows
+│   ├── Blocks/              # Block generators
+│   └── reflections/         # Reflection templates
+├── BOOTLOADER.prompt.md     # Installation script
+└── PERSONALIZE.prompt.md    # Configuration wizard
+```
+
+→ See [docs/FOLDER_STRUCTURE.md](docs/FOLDER_STRUCTURE.md) for details
+
+---
+
+## Philosophy
+
+N5OS Ode is built on these beliefs:
+
+1. **Structure Enables Creativity** — Frameworks free you to focus on what matters
+2. **Specialists Beat Generalists** — Focused context produces better results
+3. **Memory Makes Intelligence** — Without continuity, each conversation starts from zero
+4. **Safety First** — Better to ask than accidentally destroy
+5. **Progressive Enhancement** — Start simple, add complexity as needed
+
+→ See [docs/PHILOSOPHY.md](docs/PHILOSOPHY.md) for the full story
+
+---
+
+## Documentation
+
+| Doc | Description |
+|-----|-------------|
+| [PHILOSOPHY.md](docs/PHILOSOPHY.md) | Why N5OS exists, core concepts |
+| [PERSONAS.md](docs/PERSONAS.md) | Specialist personas, routing |
+| [RULES.md](docs/RULES.md) | Behavioral rules, customization |
+| [FOLDER_STRUCTURE.md](docs/FOLDER_STRUCTURE.md) | Directory layout, conventions |
+| [BLOCK_SYSTEM.md](docs/BLOCK_SYSTEM.md) | Block generators for transcripts |
+| [SEMANTIC_MEMORY.md](docs/SEMANTIC_MEMORY.md) | Optional memory layer setup |
+
+---
+
+## Customization
+
+N5OS Ode is a starting point, not a cage:
+
+- **Add personas** — Create specialists for your domains
+- **Modify rules** — Adapt to your preferences
+- **Create prompts** — Build workflows for recurring tasks
+- **Extend blocks** — Generate custom intelligence from transcripts
+
+Everything can be edited in Zo Settings or the workspace.
+
+---
+
+## Getting Help
+
+**Something not working?**
+Check if the persona/rule is installed: Settings > Your AI
+
+**Want to modify behavior?**
+Edit personas and rules in Settings, or modify the prompts directly
+
+**Need to start over?**
+Re-run @BOOTLOADER — it's idempotent (safe to run multiple times)
+
+---
+
+## Version
+
+**N5OS Ode v1.0**  
+Released: January 2026
+
+---
+
+*Structured thinking for structured doing.*
+
