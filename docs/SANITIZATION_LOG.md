@@ -1,8 +1,8 @@
 ---
 created: 2026-01-15
 last_edited: 2026-01-15
-version: 1.0
-provenance: con_FpSgcodcdVPhY7H2
+version: 1.1
+provenance: con_2yzxunQ3ZoBqIQ3Q
 ---
 
 # Core Scripts Sanitization Log
@@ -101,6 +101,73 @@ provenance: con_FpSgcodcdVPhY7H2
 
 ---
 
+## Worker 003: Semantic Memory Package
+
+**Worker:** Worker 003 - Semantic Memory Sanitization
+**Date:** 2026-01-15
+**Source:** V's N5 cognition (`/home/workspace/N5/cognition/`)
+**Target:** n5OS-Ode export (`/home/workspace/N5/export/n5os-ode/N5/cognition/`)
+
+### Files Created
+
+#### 1. `n5_memory_client.py`
+**Source Lines:** ~900+
+**Changes:**
+- **REMOVED:** Hardcoded paths to V's workspace (now configurable)
+- **REMOVED:** V-specific semantic profiles:
+  - `crm` → (personal CRM paths)
+  - `meetings` → (personal meeting paths)
+  - `wellness` → (personal health tracking)
+  - `voice-guides` → (personal communication patterns)
+- **REPLACED:** With generic profiles (`documents`, `notes`, `prompts`)
+- **REMOVED:** Import from `N5.lib.paths` (V-specific path management)
+- **ADDED:** Environment variable configuration:
+  - `N5_WORKSPACE` - workspace root
+  - `N5_BRAIN_DB` - database path
+  - `N5_HNSW_INDEX` - vector index path
+- **ADDED:** Multiple secret file location search
+- **ADDED:** Full CLI interface with argparse
+- **ADDED:** Comprehensive docstrings
+- **KEPT:** All core functionality:
+  - Multi-provider embeddings (OpenAI, local)
+  - Hybrid search (semantic + BM25)
+  - Cross-encoder reranking
+  - HNSW approximate search
+  - Markdown-aware chunking
+  - Recency-weighted retrieval
+
+#### 2. `schema.sql`
+**Changes:**
+- Copied directly (no V-specific content)
+- Added recommended indexes
+
+#### 3. `config.yaml`
+**Changes:**
+- Created template configuration
+- Documented all settings with comments
+- Default to local embeddings (no API key required)
+
+### Documentation Created
+
+#### `docs/SEMANTIC_MEMORY.md`
+- Architecture overview with ASCII diagram
+- Quick start guide
+- CLI usage examples
+- Configuration reference
+- Environment variables table
+- Search feature documentation
+- Performance tips
+- Troubleshooting guide
+
+### Verification Checklist
+
+- [x] No hardcoded V-specific paths
+- [x] No personal file references
+- [x] Configurable via environment variables
+- [x] Works with both OpenAI and local embeddings
+- [x] CLI interface functional
+- [x] Documentation complete
+
 ## Not Included (By Design)
 
 These scripts were NOT exported as they are V-specific:
@@ -111,3 +178,5 @@ These scripts were NOT exported as they are V-specific:
 - `reflection_*.py` - Reflection system
 - `shortio_*.py` - Personal URL shortener
 - `stakeholder_*.py` - Contact intelligence
+
+

@@ -1,0 +1,29 @@
+# N5 Semantic Memory Configuration
+# ================================
+# Configure your embedding provider and retrieval settings
+
+# Embedding provider: 'openai' or 'local'
+# - openai: Uses OpenAI's text-embedding-3-large (requires OPENAI_API_KEY)
+# - local: Uses sentence-transformers all-MiniLM-L6-v2 (runs locally, no API needed)
+embedding_provider: local
+
+# OpenAI model (only used when embedding_provider: openai)
+openai_model: text-embedding-3-large
+
+# Default recency weight for search (0-1)
+# Higher values favor more recent content
+recency_weight_default: 0.2
+
+# Hybrid search weights
+semantic_weight: 0.7  # Weight for vector similarity
+bm25_weight: 0.3      # Weight for keyword matching (BM25)
+
+# ANN index settings
+use_vector_index: true  # Use HNSW for fast approximate search
+ann_ef_search: 100      # Search quality parameter (higher = more accurate, slower)
+
+# Chunking settings
+max_chunk_size: 1500    # Maximum characters per chunk
+min_chunk_size: 200     # Minimum characters (smaller chunks are discarded)
+chunk_overlap: 100      # Overlap between chunks for context continuity
+
