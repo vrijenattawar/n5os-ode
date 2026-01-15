@@ -1,0 +1,52 @@
+# n5OS-Ode Context Manifest
+# Defines context bundles for different task types
+# Usage: python3 N5/scripts/n5_load_context.py <category>
+
+version: "1.0"
+
+# CONTEXT GROUPS
+# Static collections of files for specific modes
+groups:
+  build:
+    description: "Implementation, refactoring, coding, engineering"
+    files:
+      - "N5/prefs/operations/planning_prompt.md"
+      - "Knowledge/architectural/principles.md"
+  
+  strategy:
+    description: "High-level thinking, planning, decision making, reasoning"
+    files:
+      - "Knowledge/architectural/principles.md"
+  
+  system:
+    description: "Lists, Index, System Operations, Database"
+    files:
+      - "N5/schemas/index.schema.json" 
+      - "Lists/POLICY.md"
+
+  safety:
+    description: "Destructive ops, moves, deletes"
+    files:
+      - "N5/scripts/n5_safety.py"
+
+  scheduler:
+    description: "Agents, Scheduled Tasks, Automation"
+    files:
+      - "N5/prefs/operations/scheduled-task-protocol.md"
+
+  writer:
+    description: "Content creation, writing, polished communication"
+    files:
+      - "N5/prefs/communication/style-guide.md"
+      
+  research:
+    description: "Deep dive, analysis, web research"
+    files:
+      - "N5/prefs/operations/planning_prompt.md"
+
+# DYNAMIC CONTEXT (Optional)
+# Memory integration for semantic context retrieval
+dynamic:
+  enabled: false
+  memory_query_limit: 3
+  min_query_length: 2
