@@ -10,7 +10,7 @@ Usage:
     n5_protect.py check <path>
     n5_protect.py mark-pii <path> --categories email,phone [--note "description"]
 
-Part of n5OS-Ode: https://github.com/PROJECT_REPO/n5os-ode
+Part of n5OS-Ode: https://github.com/vrijenattawar/n5os-ode
 """
 
 import argparse
@@ -307,3 +307,4 @@ def main():
 
 if __name__ == "__main__":
     sys.exit(main())
+

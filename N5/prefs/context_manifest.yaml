@@ -12,37 +12,44 @@ groups:
     files:
       - "N5/prefs/operations/planning_prompt.md"
       - "Knowledge/architectural/principles.md"
+      - "docs/PHILOSOPHY.md"
   
   strategy:
     description: "High-level thinking, planning, decision making, reasoning"
     files:
       - "Knowledge/architectural/principles.md"
+      - "docs/PHILOSOPHY.md"
   
   system:
     description: "Lists, Index, System Operations, Database"
     files:
       - "N5/schemas/index.schema.json" 
       - "Lists/POLICY.md"
+      - ".gitignore"
 
   safety:
     description: "Destructive ops, moves, deletes"
     files:
       - "N5/scripts/n5_safety.py"
+      - "N5/prefs/operations/planning_prompt.md"
 
   scheduler:
     description: "Agents, Scheduled Tasks, Automation"
     files:
       - "N5/prefs/operations/scheduled-task-protocol.md"
+      - "N5/config/emoji-legend.json"
 
   writer:
     description: "Content creation, writing, polished communication"
     files:
       - "N5/prefs/communication/style-guide.md"
+      - "docs/PHILOSOPHY.md"
       
   research:
     description: "Deep dive, analysis, web research"
     files:
       - "N5/prefs/operations/planning_prompt.md"
+      - "docs/PHILOSOPHY.md"
 
 # DYNAMIC CONTEXT (Optional)
 # Memory integration for semantic context retrieval
@@ -50,3 +57,4 @@ dynamic:
   enabled: false
   memory_query_limit: 3
   min_query_length: 2
+

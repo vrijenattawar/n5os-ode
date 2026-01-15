@@ -25,7 +25,7 @@ Examples:
     python3 journal.py list --type morning_pages --days 7
     python3 journal.py view 42
 
-Part of n5OS-Ode: https://github.com/PROJECT_REPO/n5os-ode
+Part of n5OS-Ode: https://github.com/vrijenattawar/n5os-ode
 """
 
 import argparse
@@ -384,3 +384,4 @@ def main():
 
 if __name__ == "__main__":
     sys.exit(main())
+

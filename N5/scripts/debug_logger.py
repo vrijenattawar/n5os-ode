@@ -12,7 +12,7 @@ Commands:
     recent    - Show recent debug attempts
     patterns  - Detect circular debugging patterns
 
-Part of n5OS-Ode: https://github.com/PROJECT_REPO/n5os-ode
+Part of n5OS-Ode: https://github.com/vrijenattawar/n5os-ode
 """
 
 import argparse
@@ -329,3 +329,4 @@ def main():
 
 if __name__ == "__main__":
     sys.exit(main())
+

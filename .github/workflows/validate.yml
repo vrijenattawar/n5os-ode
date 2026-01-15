@@ -1,0 +1,77 @@
+name: Validate n5OS-Ode
+
+on:
+  push:
+    branches: [ main, develop, 'fix/**' ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        python-version: ['3.9', '3.10', '3.11', '3.12']
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Check Python syntax
+      run: |
+        python3 -m py_compile N5/scripts/*.py
+        python3 -m py_compile scripts/*.py
+        python3 -m py_compile N5/cognition/*.py
+    
+    - name: Validate repo structure
+      run: |
+        python3 scripts/validate_repo.py --verbose
+    
+    - name: Check for required files
+      run: |
+        test -f "README.md" || exit 1
+        test -f "CHANGELOG.md" || exit 1
+        test -f "N5/prefs/context_manifest.yaml" || exit 1
+        test -f "N5/config/emoji-legend.json" || exit 1
+        test -d "Prompts" || exit 1
+        test -d "Knowledge" || exit 1
+        test -d "N5/scripts" || exit 1
+    
+    - name: Check for common issues
+      run: |
+        # No PROJECT_REPO placeholders
+        ! grep -r "PROJECT_REPO" . --include="*.py" --include="*.md" 2>/dev/null || exit 1
+        
+        # No untracked __pycache__
+        ! find . -type d -name "__pycache__" 2>/dev/null | grep -v ".git" || exit 1
+        
+        # JSON files are valid
+        python3 -m json.tool N5/config/emoji-legend.json > /dev/null
+        python3 -m json.tool N5/config/commit_targets.json > /dev/null
+    
+    - name: Lint YAML
+      run: |
+        python3 - <<'PYEOF'
+        import yaml
+        from pathlib import Path
+        
+        yaml_files = list(Path('.').rglob('*.yaml')) + list(Path('.').rglob('*.yml'))
+        for f in yaml_files:
+            try:
+                yaml.safe_load(f.read_text())
+            except Exception as e:
+                print(f"YAML error in {f}: {e}")
+                exit(1)
+        PYEOF
+    
+    - name: Report validation success
+      run: |
+        echo "✅ All validation checks passed!"
+        echo "Python: ${{ matrix.python-version }}"
+        echo "OS: ubuntu-latest"
+

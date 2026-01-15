@@ -9,7 +9,7 @@ Usage:
     python3 n5_load_context.py strategy
     python3 n5_load_context.py "custom task description"
 
-Part of n5OS-Ode: https://github.com/PROJECT_REPO/n5os-ode
+Part of n5OS-Ode: https://github.com/vrijenattawar/n5os-ode
 """
 
 import argparse
@@ -177,3 +177,4 @@ Examples:
 
 if __name__ == "__main__":
     sys.exit(main())
+

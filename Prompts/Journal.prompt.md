@@ -31,24 +31,24 @@ For manual/non-conversational journaling:
 
 ```bash
 # Start a new entry
-python3 scripts/journal.py new morning_pages
-python3 scripts/journal.py new evening
-python3 scripts/journal.py new gratitude
-python3 scripts/journal.py new weekly_review
-python3 scripts/journal.py new journal  # general
+python3 N5/scripts/journal.py new morning_pages
+python3 N5/scripts/journal.py new evening
+python3 N5/scripts/journal.py new gratitude
+python3 N5/scripts/journal.py new weekly_review
+python3 N5/scripts/journal.py new journal  # general
 
 # List recent entries
-python3 scripts/journal.py list
-python3 scripts/journal.py list --type evening --days 7
+python3 N5/scripts/journal.py list
+python3 N5/scripts/journal.py list --type evening --days 7
 
 # View specific entry
-python3 scripts/journal.py view 42
+python3 N5/scripts/journal.py view 42
 
 # Search entries
-python3 scripts/journal.py search "gratitude"
+python3 N5/scripts/journal.py search "gratitude"
 
 # See all types and stats
-python3 scripts/journal.py types
+python3 N5/scripts/journal.py types
 ```
 
 ## Entry Types
@@ -78,5 +78,6 @@ Schema:
 ## Reflection Prompts Location
 
 `Prompts/reflections/` contains the guided interview rubrics for each reflection type.
+
 
 

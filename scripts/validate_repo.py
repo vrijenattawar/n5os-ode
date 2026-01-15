@@ -32,7 +32,8 @@ def main():
     file_ref_re = re.compile(r"`file '([^']+)'`")
     existing = {str(p).replace('\\', '/') for p in root.rglob('*') if p.is_file()}
     
-    for md_file in root.rglob("*.md") | root.rglob("*.prompt.md"):
+    md_files = list(root.rglob("*.md")) + list(root.rglob("*.prompt.md"))
+    for md_file in md_files:
         try:
             txt = md_file.read_text(errors="ignore")
         except Exception:
@@ -114,4 +115,5 @@ def main():
 
 if __name__ == "__main__":
     sys.exit(main())
+
 
