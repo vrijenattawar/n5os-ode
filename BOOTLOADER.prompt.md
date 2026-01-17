@@ -15,7 +15,8 @@ This prompt installs N5OS Ode into your Zo workspace. It will:
 2. **Install 6 core rules** for consistent behavior
 3. **Build the folder structure** for organized knowledge and workflows
 4. **Initialize core configuration files**
-5. **Validate the installation**
+5. **Set up Semantic Memory** for AI-powered search across your workspace
+6. **Validate the installation**
 
 > **Safe to run multiple times.** The bootloader checks for existing installations and only creates what's missing.
 
@@ -512,26 +513,133 @@ Create `.n5protected` marker files in:
 
 ---
 
-## Phase 5: Validate Installation
+## Phase 5: Set Up Semantic Memory
 
-After completing phases 1-4, verify:
+Semantic Memory gives your AI the ability to search your workspace by meaning, not just keywords. This is optional but highly recommended.
+
+### 5.1 Create the cognition directory
+
+```bash
+mkdir -p N5/cognition
+```
+
+### 5.2 Install Python dependencies
+
+```bash
+pip install numpy openai sentence-transformers
+```
+
+### 5.3 Initialize the database
+
+Create `N5/cognition/brain.db` by running:
+
+```bash
+python3 -c "
+import sqlite3
+import os
+
+db_path = 'N5/cognition/brain.db'
+os.makedirs(os.path.dirname(db_path), exist_ok=True)
+
+conn = sqlite3.connect(db_path)
+cursor = conn.cursor()
+
+# Create tables
+cursor.executescript('''
+CREATE TABLE IF NOT EXISTS resources (
+    id TEXT PRIMARY KEY,
+    path TEXT UNIQUE,
+    hash TEXT,
+    last_indexed_at TEXT,
+    content_date TEXT
+);
+
+CREATE TABLE IF NOT EXISTS blocks (
+    id TEXT PRIMARY KEY,
+    resource_id TEXT,
+    block_type TEXT,
+    content TEXT,
+    start_line INTEGER,
+    end_line INTEGER,
+    token_count INTEGER,
+    content_date TEXT,
+    FOREIGN KEY (resource_id) REFERENCES resources(id)
+);
+
+CREATE TABLE IF NOT EXISTS vectors (
+    block_id TEXT PRIMARY KEY,
+    embedding BLOB,
+    FOREIGN KEY (block_id) REFERENCES blocks(id)
+);
+
+CREATE TABLE IF NOT EXISTS tags (
+    resource_id TEXT,
+    tag TEXT,
+    PRIMARY KEY (resource_id, tag),
+    FOREIGN KEY (resource_id) REFERENCES resources(id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_resources_path ON resources(path);
+CREATE INDEX IF NOT EXISTS idx_blocks_resource ON blocks(resource_id);
+CREATE INDEX IF NOT EXISTS idx_tags_tag ON tags(tag);
+''')
+
+conn.commit()
+conn.close()
+print('✓ Semantic memory database initialized at N5/cognition/brain.db')
+"
+```
+
+### 5.4 Configure embedding provider (Optional)
+
+For best quality semantic search, set up OpenAI embeddings:
+
+1. Go to [Settings > Developers](/?t=settings&s=developers)
+2. Add a secret named `OPENAI_API_KEY` with your API key
+
+Without this, the system uses local embeddings (sentence-transformers) which work offline but are slightly less accurate.
+
+### 5.5 Test semantic memory
+
+```bash
+# Index a test file
+python3 -c "
+from N5.cognition.n5_memory_client import N5MemoryClient
+client = N5MemoryClient()
+client.index_file('N5/prefs/prefs.md')
+print('✓ Test file indexed successfully')
+"
+```
+
+> **Note**: See `docs/SEMANTIC_MEMORY.md` for full documentation on indexing your workspace and advanced search features.
+
+---
+
+## Phase 6: Validate Installation
+
+After completing phases 1-5, verify:
 
 1. **Personas exist**: List personas and confirm all 6 Ode personas are present
 2. **Rules exist**: List rules and confirm all 6 core rules are present
 3. **Folders exist**: Verify N5/, Knowledge/, Records/, Prompts/ structure
 4. **Files exist**: Confirm prefs.md and context_manifest.yaml exist
+5. **Semantic memory**: Confirm N5/cognition/brain.db exists
 
 ### Validation Commands
 
 ```bash
 # Check folder structure
 ls -la N5/
+ls -la N5/cognition/
 ls -la Knowledge/
 ls -la Prompts/
 
 # Check core files
 cat N5/prefs/prefs.md
 cat N5/config/context_manifest.yaml
+
+# Check semantic memory
+ls -la N5/cognition/brain.db
 ```
 
 ---
