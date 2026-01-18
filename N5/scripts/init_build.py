@@ -8,6 +8,7 @@ Creates:
     N5/builds/<slug>/
     ├── PLAN.md
     ├── STATUS.md
+    ├── .n5protected
     └── artifacts/
 """
 import argparse
@@ -119,6 +120,9 @@ def main() -> int:
         build_path.mkdir(parents=True, exist_ok=True)
         (build_path / "artifacts").mkdir(exist_ok=True)
         
+        # Create .n5protected file to prevent accidental deletion
+        (build_path / ".n5protected").write_text("# N5 Protected: Build workspace\n")
+        
         # Create PLAN.md
         plan_content = get_plan_template(title, today)
         (build_path / "PLAN.md").write_text(plan_content)
@@ -131,7 +135,8 @@ def main() -> int:
         print(f"✓ Build workspace created: {build_path}")
         print(f"  ├── PLAN.md")
         print(f"  ├── STATUS.md")
-        print(f"  └── artifacts/")
+        print(f"  ├── artifacts/")
+        print(f"  └── .n5protected")
         print(f"\nNext: Edit PLAN.md to define your build objective and tasks.")
         
         return 0
