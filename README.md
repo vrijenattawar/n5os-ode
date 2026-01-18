@@ -242,6 +242,7 @@ N5OS Ode is built on these beliefs:
 | Doc | Description |
 |-----|-------------|
 | [PHILOSOPHY.md](docs/PHILOSOPHY.md) | Why N5OS exists, core concepts |
+| [NUANCE_MANIFEST.md](docs/NUANCE_MANIFEST.md) | Prompt engineering patterns for AI quality |
 | [PERSONAS.md](docs/PERSONAS.md) | Specialist personas, routing |
 | [ROUTING.md](docs/ROUTING.md) | Persona choreography, handoffs |
 | [RULES.md](docs/RULES.md) | Behavioral rules, customization |
