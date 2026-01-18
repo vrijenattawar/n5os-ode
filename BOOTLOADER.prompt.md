@@ -424,21 +424,18 @@ Execute these commands to create the N5OS directory structure:
 # Core N5 directories
 mkdir -p N5/prefs
 mkdir -p N5/scripts
-mkdir -p N5/config
-mkdir -p N5/lists
-mkdir -p N5/review
+mkdir -p N5/cognition
 
 # Knowledge organization
-mkdir -p Knowledge/domains
-mkdir -p Knowledge/references
+mkdir -p Knowledge/content-library/articles
+mkdir -p Knowledge/content-library/notes
 
 # Records and tracking
-mkdir -p Records/meetings
-mkdir -p Records/projects
+mkdir -p Records/journal
 
 # Prompts organization
-mkdir -p Prompts/workflows
-mkdir -p Prompts/blocks
+mkdir -p Prompts/Blocks
+mkdir -p Prompts/reflections
 ```
 
 ---

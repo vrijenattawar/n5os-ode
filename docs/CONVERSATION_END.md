@@ -170,8 +170,9 @@ python3 N5/scripts/conversation_end_router.py --convo-id <id> [--force-tier N]
 ```
 
 ### Worker completion notification
+**⚠️ PENDING**: Script will be added during upgrade.
 ```bash
-python3 N5/scripts/build_worker_complete.py --convo-id <id> --build-id <slug> --worker-num <n>
+# python3 N5/scripts/build_worker_complete.py --convo-id <id> --build-id <slug> --worker-num <n>
 ```
 
 ### Position extraction
@@ -181,8 +182,15 @@ python3 N5/scripts/positions.py check-overlap "insight text"
 ```
 
 ### PII Audit
+**⚠️ PENDING**: Script will be added during upgrade.
 ```bash
-python3 N5/scripts/conversation_pii_audit.py --convo-id <id> --auto-mark
+# python3 N5/scripts/conversation_pii_audit.py --convo-id <id> --auto-mark
+```
+
+### Capability graduation check
+**⚠️ PENDING**: Script will be added during upgrade.
+```bash
+# python3 N5/scripts/capability_graduation.py check --build-slug <slug>
 ```
 
 ---
@@ -190,6 +198,27 @@ python3 N5/scripts/conversation_pii_audit.py --convo-id <id> --auto-mark
 ## See Also
 
 - **Prompt:** `file 'Prompts/Close Conversation.prompt.md'` (v5.1)
-- **Router:** `file 'N5/scripts/conversation_end_router.py'` (424 lines)
+- **Router:** `file 'N5/scripts/conversation_end_router.py'` (v3.0)
 - **Spec:** `file 'N5/prefs/operations/conversation-end-v3.md'`
 - **Emoji Legend:** `file 'N5/config/emoji-legend.json'`
+
+---
+
+## Implementation Status
+
+**✅ Implemented (Ready to use):**
+- `N5/scripts/conversation_end_router.py` — Tier detection and routing
+- `N5/scripts/positions.py` — Position extraction and overlap checking
+- `N5/scripts/session_state_manager.py` — SESSION_STATE management
+- Two-mode system (Worker Close vs Full Close) documentation
+- Worker handoff workflow
+
+**⏳ Pending (Will be added during upgrade):**
+- `N5/scripts/conversation_end_quick.py` — Tier 1 mechanical close
+- `N5/scripts/conversation_end_standard.py` — Tier 2 mechanical close
+- `N5/scripts/conversation_end_full.py` — Tier 3 mechanical close
+- `N5/scripts/conversation_pii_audit.py` — PII detection and marking
+- `N5/scripts/capability_graduation.py` — Capability graduation checks
+- `N5/scripts/build_worker_complete.py` — Worker-to-orchestrator notification
+
+Until these scripts are available, the mechanical steps must be executed manually following the workflow in `Close Conversation.prompt.md`.

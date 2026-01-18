@@ -112,21 +112,16 @@ python3 N5/scripts/session_state_manager.py update --convo-id {CONVO_ID} \
   --status complete --message "Worker handoff ready for orchestrator review"
 ```
 
-## Worker Step 5: Notify Build Orchestrator
+## Worker Step 5: Notify Orchestrator
 
-**NEW:** Update the build's STATUS.md and plan.json with completion info:
+**⚠️ PENDING IMPLEMENTATION**: The `build_worker_complete.py` script will be added during upgrade. For now, skip this step — the orchestrator will detect worker completion via SESSION_STATE status.
 
 ```bash
-python3 N5/scripts/build_worker_complete.py --convo-id {CONVO_ID} \
-  --status complete --summary "Brief description of what was accomplished"
+# python3 N5/scripts/build_worker_complete.py --convo-id {CONVO_ID} \
+#   --build-id {BUILD_ID} --worker-num {WORKER_NUM}
 ```
 
-This automatically:
-- Updates the Worker Status table in `N5/builds/{build_id}/STATUS.md`
-- Updates `plan.json` if using build_orchestrator_v2
-- Appends to the Activity Log
-
-**Status options:** `complete`, `partial`, `blocked`
+This notifies the orchestrator that worker `{WORKER_NUM}` for build `{BUILD_ID}` is complete.
 
 ## Worker Step 6: DO NOT COMMIT
 
@@ -166,6 +161,18 @@ Review the recommendation. Override with `--tier=N` if needed.
 
 ## Full Step 2: Execute Mechanical Close
 
+**⚠️ PENDING IMPLEMENTATION**: The tier-specific execution scripts (`conversation_end_quick.py`, `conversation_end_standard.py`, `conversation_end_full.py`) will be added during upgrade. For now, execute mechanical steps manually based on tier:
+
+```bash
+# Determine tier first
+python3 N5/scripts/conversation_end_router.py --convo-id {CONVO_ID}
+
+# Tier 1: Archive conversation workspace
+# Tier 2: Gather file lists, git status
+# Tier 3: Full analysis bundle including context
+```
+
+**When scripts are available:**
 ```bash
 # Tier 1
 python3 N5/scripts/conversation_end_quick.py --convo-id {CONVO_ID}
@@ -179,8 +186,10 @@ python3 N5/scripts/conversation_end_full.py --convo-id {CONVO_ID}
 
 ## Full Step 3: PII Audit
 
+**⚠️ PENDING IMPLEMENTATION**: The `conversation_pii_audit.py` script will be added during upgrade. For now, manually review files for PII before archiving.
+
 ```bash
-python3 N5/scripts/conversation_pii_audit.py --convo-id {CONVO_ID} --auto-mark
+# python3 N5/scripts/conversation_pii_audit.py --convo-id {CONVO_ID} --auto-mark
 ```
 
 Skip if conversation was purely discussion with no file creation.
@@ -328,9 +337,14 @@ Present formatted close output. End with:
 
 ## Documentation
 
-- **Spec:** `file 'N5/prefs/operations/conversation-end-v3.md'`
+- **Spec:** `file 'N5/prefs/operations/conversation-end-v3.md'` (v3.0)
 - **Emoji Legend:** `file 'N5/config/emoji-legend.json'`
 - **Positions System:** `file 'N5/scripts/positions.py'`
+- **Router:** `file 'N5/scripts/conversation_end_router.py'` (v3.0)
+
+**⚠️ Implementation Status:**
+- ✅ **Implemented**: Router, SESSION_STATE integration, mode/tier detection, positions.py
+- ⏳ **Pending (upgrade work)**: Tier-specific execution scripts, PII audit, capability graduation, worker notification
 
 ## Version History
 
