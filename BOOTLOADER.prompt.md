@@ -471,7 +471,7 @@ version: 1.0
 Run @PERSONALIZE to configure these settings.
 ```
 
-### 4.2 Create N5/config/context_manifest.yaml
+### 4.2 Create N5/prefs/context_manifest.yaml
 
 ```yaml
 # N5OS Ode Context Manifest
@@ -598,17 +598,17 @@ Without this, the system uses local embeddings (sentence-transformers) which wor
 
 ### 5.5 Test semantic memory
 
+Verify the database was created:
+
 ```bash
-# Index a test file
-python3 -c "
-from N5.cognition.n5_memory_client import N5MemoryClient
-client = N5MemoryClient()
-client.index_file('N5/prefs/prefs.md')
-print('✓ Test file indexed successfully')
-"
+# Check if database file exists
+ls -lh N5/cognition/brain.db
+
+# Verify database structure
+sqlite3 N5/cognition/brain.db "SELECT name FROM sqlite_master WHERE type='table';"
 ```
 
-> **Note**: See `docs/SEMANTIC_MEMORY.md` for full documentation on indexing your workspace and advanced search features.
+If both commands succeed, semantic memory is ready. Full semantic search functionality requires the `N5/cognition/n5_memory_client.py` script, which is provided separately in the N5OS Ode distribution.
 
 ---
 
@@ -634,7 +634,7 @@ ls -la Prompts/
 
 # Check core files
 cat N5/prefs/prefs.md
-cat N5/config/context_manifest.yaml
+cat N5/prefs/context_manifest.yaml
 
 # Check semantic memory
 ls -la N5/cognition/brain.db
