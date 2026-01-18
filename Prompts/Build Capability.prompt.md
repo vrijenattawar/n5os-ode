@@ -24,7 +24,7 @@ tool: true
 3. **Activate Architect** (`set_active_persona("74e0a70d-398a-4337-bcab-3e5a3a9d805c")`)
 4. **Architect creates plan** in `N5/builds/<slug>/PLAN.md` following template
 5. **Invoke Level Upper** for counterintuitive review (experimental)
-6. **Present plan** for approval
+6. **Present plan for approval**
 7. **On approval:** Hand off to Builder for execution
 
 ## Slug Convention
