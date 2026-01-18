@@ -1,7 +1,3 @@
-# n5OS-Ode Context Manifest
-# Defines context bundles for different task types
-# Usage: python3 N5/scripts/n5_load_context.py <category>
-
 version: "1.0"
 
 # CONTEXT GROUPS
@@ -11,50 +7,67 @@ groups:
     description: "Implementation, refactoring, coding, engineering"
     files:
       - "N5/prefs/operations/planning_prompt.md"
-      - "Knowledge/architectural/principles.md"
-      - "docs/PHILOSOPHY.md"
+      - "Knowledge/architectural/architectural_principles.md"
   
   strategy:
     description: "High-level thinking, planning, decision making, reasoning"
     files:
-      - "Knowledge/architectural/principles.md"
-      - "docs/PHILOSOPHY.md"
+      - "Knowledge/architectural/architectural_principles.md"
+      - "Knowledge/stable/careerspan-timeline.md"
   
   system:
     description: "Lists, Index, System Operations, Database"
     files:
       - "N5/schemas/index.schema.json" 
       - "Lists/POLICY.md"
-      - ".gitignore"
 
   safety:
     description: "Destructive ops, moves, deletes"
     files:
       - "N5/scripts/n5_safety.py"
-      - "N5/prefs/operations/planning_prompt.md"
+      - "Knowledge/architectural/principles/safety.md"
 
   scheduler:
     description: "Agents, Scheduled Tasks, Automation"
     files:
       - "N5/prefs/operations/scheduled-task-protocol.md"
-      - "N5/config/emoji-legend.json"
 
   writer:
     description: "Content creation, writing, polished communication"
     files:
-      - "N5/prefs/communication/style-guide.md"
-      - "docs/PHILOSOPHY.md"
+      - "N5/prefs/communication/patterns/patterns-index.md"
+      - "N5/prefs/communication/voice-transformation-system.md"
+      - "N5/prefs/communication/style-guides/hedging-antipatterns.md"
+      - "N5/prefs/communication/style-guides/directness-calibration.md"
+      - "N5/prefs/communication/style-guides/succinctness-pairs.md"
+      - "Knowledge/content-library/personal/psychographic-portrait-linkedin-2026-01.md"  # V's authentic voice patterns, emotional triggers, themes
       
   research:
     description: "Deep dive, analysis, web research"
     files:
+      - "N5/prefs/principles/P04_ontology_weighted.yaml"
       - "N5/prefs/operations/planning_prompt.md"
-      - "docs/PHILOSOPHY.md"
 
-# DYNAMIC CONTEXT (Optional)
-# Memory integration for semantic context retrieval
-dynamic:
-  enabled: false
-  memory_query_limit: 3
-  min_query_length: 2
+  health:
+    description: "Health planning, bio-context, energy management, supplement decisions"
+    files:
+      - "Personal/Health/synthesis/Vrijen-Bio-Context.md"
+      - "Personal/Health/stack/current_medications.yaml"
+      - "Personal/Health/stack/current_supplements.yaml"
+      - "N5/systems/health/regimen.json"
+
+  general:
+    description: "Fallback for novel or undefined tasks"
+    files:
+      - "Knowledge/architectural/principles/core.md"
+      - "N5/prefs/prefs.md"
+      
+# PRINCIPLES CONFIG
+principles_dir: "N5/prefs/principles"
+
+
+
+
+
+
 

@@ -1,0 +1,35 @@
+---
+id: P5
+name: Safety, Determinism, and Anti-Overwrite
+category: quality
+priority: high
+version: "1.0.0"
+created: "2025-11-02"
+
+purpose: |
+  Prevent data loss through anti-overwrite protections, automatic versioning, and audit logging.
+
+when_to_apply:
+  - Writing or modifying files
+  - Performing destructive operations
+  - Managing configuration changes
+
+pattern:
+  core_behavior: |
+    Never overwrite protected files without explicit confirmation.
+    Auto-version on filename conflict: _v2, _v3, etc.
+    Keep rolling backup and write audit line per operation.
+
+examples:
+  - description: Saving processed output
+    good: "Check if file exists, auto-version to _v2 if conflict, log operation"
+    bad: "Silently overwrite existing file, losing previous version"
+
+anti_patterns:
+  - symptom: "Files being overwritten without warning or backup"
+    fix: "Implement auto-versioning and explicit confirmation for overwrites"
+
+changelog:
+  - date: "2025-11-02"
+    version: "1.0.0"
+    changes: "Initial YAML migration from operational_principles.md"

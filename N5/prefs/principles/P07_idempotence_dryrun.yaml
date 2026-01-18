@@ -1,0 +1,38 @@
+---
+id: P7
+name: Idempotence and Dry-Run by Default
+category: code_patterns
+priority: high
+version: "1.0.0"
+created: "2025-11-02"
+
+purpose: |
+  Ensure workflows can be safely re-run and support dry-run mode for verification before execution.
+
+when_to_apply:
+  - Building any workflow that writes files
+  - Creating workflows that schedule events
+  - Implementing operations with side effects
+
+pattern:
+  core_behavior: |
+    Support dry-run mode for any workflow that writes files or schedules events.
+    Re-running same instruction should produce identical end-state unless inputs changed.
+    Allow verification before commitment.
+
+examples:
+  - description: File processing workflow
+    good: "Offer --dry-run flag showing what would be done, require confirmation for actual execution"
+    bad: "Execute immediately without preview or ability to verify first"
+
+anti_patterns:
+  - symptom: "Running workflow multiple times produces different results with same inputs"
+    fix: "Make operations idempotent; same inputs → same outputs"
+
+  - symptom: "No way to preview changes before committing"
+    fix: "Implement dry-run mode showing intended operations"
+
+changelog:
+  - date: "2025-11-02"
+    version: "1.0.0"
+    changes: "Initial YAML migration from operational_principles.md"

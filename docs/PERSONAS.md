@@ -87,6 +87,8 @@ N5OS Ode uses **6 specialist personas** that you can route work to based on the 
 - Fact-finding and verification
 - Synthesizing multiple sources
 
+See [workflow](../N5/prefs/workflows/researcher_workflow.md) for detailed operation.
+
 **Output Format**:
 ```
 ## Key Findings
@@ -122,6 +124,8 @@ N5OS Ode uses **6 specialist personas** that you can route work to based on the 
 - Content and articles
 - Any writing that needs polish
 
+See [workflow](../N5/prefs/workflows/writer_workflow.md) for detailed operation.
+
 **Before Writing, Clarifies**:
 1. Audience: Who will read this?
 2. Purpose: What should they do/think/feel?
@@ -147,6 +151,8 @@ N5OS Ode uses **6 specialist personas** that you can route work to based on the 
 - Creating frameworks and models
 - Analyzing patterns and trends
 - Roadmapping and planning
+
+See [workflow](../N5/prefs/workflows/strategist_workflow.md) for detailed operation.
 
 **Output Format**:
 ```
@@ -183,6 +189,8 @@ N5OS Ode uses **6 specialist personas** that you can route work to based on the 
 - Root cause analysis
 - Testing edge cases
 
+See [workflow](../N5/prefs/workflows/debugger_workflow.md) for detailed operation.
+
 **Debugging Process**:
 1. Reproduce — trigger the issue reliably
 2. Isolate — find smallest failing case
@@ -195,6 +203,34 @@ N5OS Ode uses **6 specialist personas** that you can route work to based on the 
 - After 3 failed attempts, stops to review
 - Logs debug attempts systematically
 - Questions assumptions when stuck
+
+---
+
+## How Personas Work Together
+
+The 6 personas form a coordinated system, not a collection of independent personalities. Here's how they collaborate:
+
+**1. Operator as Coordinator**
+Every conversation starts with Operator. Operator decides whether to handle a task directly or route to a specialist. Think of Operator as the "home base" that orchestrates everything.
+
+**2. Specialist Focus**
+Each specialist stays in their lane:
+- Researcher finds and synthesizes information
+- Builder implements and automates
+- Writer polishes and structures prose
+- Strategist analyzes and recommends
+- Debugger diagnoses and fixes
+
+**3. Automatic Returns**
+After completing work, specialists automatically return to Operator with a summary. This prevents "drift" and keeps the conversation on track.
+
+**4. Linear Handoffs**
+Specialists can hand off to each other for clear phase transitions, but the chain stays linear:
+```
+Operator → Researcher → Strategist → Builder → Operator
+```
+
+**For detailed routing guidance, including when to route to each specialist and examples of good vs. bad routing decisions, see [`docs/ROUTING.md`](ROUTING.md).**
 
 ---
 

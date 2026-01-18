@@ -1,0 +1,43 @@
+---
+id: P27
+name: Nemawashi Mode
+category: strategy
+priority: high
+version: "1.0.0"
+created: "2025-10-26"
+related: [P23, P24, P32]
+
+purpose: |
+  Explore 2-3 alternatives before committing to any approach. Build consensus with yourself through deliberate option evaluation.
+
+when_to_apply:
+  - Making trap door decisions
+  - Choosing core abstractions
+  - Selecting data formats
+  - Picking external dependencies
+  - Designing module interfaces
+
+pattern:
+  core_behavior: |
+    Nemawashi (根回し) - circulate proposals, evaluate trade-offs, choose consciously rather than defaulting to first idea.
+
+examples:
+  - description: Decision template
+    good: "List 2-3 options with pros/cons/trade-offs. Document rationale for chosen option and why others rejected"
+    bad: "First idea seems reasonable, implement immediately, discover better option later, sunk cost prevents switching"
+
+anti_patterns:
+  - symptom: "Forcing three options"
+    fix: "Sometimes two is enough"
+  - symptom: "Analysis paralysis"
+    fix: "Diminishing returns after 30 minutes"
+  - symptom: "Fake alternatives"
+    fix: "Option A, A-but-worse, A-different-name aren't real alternatives"
+
+changelog:
+  - date: "2025-10-26"
+    version: "1.0.0"
+    changes: "Initial principle from velocity coding talk"
+  - date: "2025-11-02"
+    version: "1.0.0"
+    changes: "Migrated to YAML format from markdown"

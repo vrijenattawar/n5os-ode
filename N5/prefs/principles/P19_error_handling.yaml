@@ -1,0 +1,55 @@
+---
+id: P19
+name: Error Handling is Not Optional
+category: safety
+priority: critical
+version: "1.0.0"
+created: "2025-11-02"
+
+purpose: |
+  Every system must gracefully handle failures with explicit error handling and recovery paths.
+
+when_to_apply:
+  - All systems, especially file I/O operations
+  - API calls
+  - Multi-step workflows
+  - State updates
+  - External service integrations
+
+pattern:
+  core_behavior: |
+    Every system must have explicit error handling and recovery paths.
+    Document what to do when things fail.
+    Log errors for post-mortem analysis.
+    Use atomic writes to prevent partial/corrupt state.
+
+examples:
+  - description: File operation error handling
+    good: "try: write() except PermissionError: rollback, log error, notify user"
+    bad: "write() with no error handling—assume it works"
+  - description: API call with recovery
+    good: "try: api_call() except Timeout: retry with backoff, log attempt, max 3 retries"
+    bad: "api_call() with no timeout or error handling"
+  - description: Multi-step workflow failure
+    good: "Phase 1 ✓ → Phase 2 failed → rollback Phase 1, log state, provide recovery steps"
+    bad: "Phase 1 fails silently → corrupt state"
+
+anti_patterns:
+  - symptom: "Omitting error paths because 'it should work'"
+    fix: "Add try-catch blocks with specific handlers for expected failures"
+  - symptom: "Silent failures that corrupt state"
+    fix: "Log all errors with context, halt before further damage"
+  - symptom: "Generic error messages without context"
+    fix: "Include operation details, file paths, state at failure"
+  - symptom: "No recovery mechanism after failure"
+    fix: "Provide rollback, retry, or manual recovery instructions"
+
+related_principles:
+  - P11: Failure Modes and Recovery
+  - P18: State Verification is Mandatory
+  - P7: Idempotence and Dry-Run
+
+changelog:
+  - date: "2025-11-02"
+    version: "1.0.0"
+    changes: "Initial YAML migration from safety.md"

@@ -1,0 +1,55 @@
+---
+id: P20
+name: Modular Design for Context Efficiency
+category: design
+priority: high
+version: "1.0.0"
+created: "2025-11-02"
+
+purpose: |
+  Enable selective loading and efficient operation by breaking large monolithic outputs into focused, independently useful modules.
+
+when_to_apply:
+  - Large documents (>500 lines)
+  - Multi-purpose systems
+  - Reference documentation
+  - Configuration files
+  - Knowledge base organization
+
+pattern:
+  core_behavior: |
+    Break large content into modules aligned with actual usage patterns.
+    Enable progressive loading: load minimal context first, then detail as needed.
+    Each module should serve a specific purpose and be independently useful.
+    Avoid circular dependencies between modules.
+
+examples:
+  - description: Large documentation refactoring
+    good: "Split large documentation by domain (load only what's needed)"
+    bad: "One massive 2000-line file that must be loaded entirely"
+  - description: System architecture
+    good: "Modular components with clear interfaces, each independently testable"
+    bad: "Monolithic system where you can't use part A without loading all of B, C, D"
+  - description: Configuration organization
+    good: "Split by purpose: auth.yaml, database.yaml, features.yaml"
+    bad: "One giant config.yaml with everything mixed together"
+
+anti_patterns:
+  - symptom: "One massive file that must be loaded entirely"
+    fix: "Split by usage patterns—when would someone need each piece?"
+  - symptom: "Arbitrary splits (by size rather than purpose)"
+    fix: "Organize by functional purpose and actual usage"
+  - symptom: "Circular dependencies between modules"
+    fix: "Design clear dependency hierarchy, extract shared dependencies"
+  - symptom: "Modules that can't stand alone"
+    fix: "Each module should be independently useful and understandable"
+
+related_principles:
+  - P2: Single Source of Truth
+  - P8: Minimal Context, Maximal Clarity
+  - P13: Naming and Placement
+
+changelog:
+  - date: "2025-11-02"
+    version: "1.0.0"
+    changes: "Initial YAML migration from design.md"

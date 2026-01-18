@@ -1,0 +1,35 @@
+---
+id: P1
+name: Human-Readable First
+category: code_patterns
+priority: high
+version: "1.0.0"
+created: "2025-11-02"
+
+purpose: |
+  Ensure outputs prioritize human comprehension before machine formats. Generate markdown/text first, derive JSON/YAML from it.
+
+when_to_apply:
+  - Creating any output files or documentation
+  - Processing information for user review
+  - Building data structures or configurations
+
+pattern:
+  core_behavior: |
+    Always generate human-readable content first (markdown, text, structured prose).
+    Derive machine formats (JSON, YAML) from the human-readable version.
+    Never start with JSON skeletons and fill in human text as afterthought.
+
+examples:
+  - description: Processing meeting notes
+    good: "Write clear markdown summary with insights, then extract action items to JSON"
+    bad: "Start with JSON skeleton with empty fields, fill in mechanically"
+
+anti_patterns:
+  - symptom: "JSON files with long string fields containing formatted text"
+    fix: "Store content as markdown/text files; use JSON only for metadata"
+
+changelog:
+  - date: "2025-11-02"
+    version: "1.0.0"
+    changes: "Initial YAML migration from operational_principles.md"

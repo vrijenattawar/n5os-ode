@@ -1,0 +1,41 @@
+---
+id: P11
+name: Failure Modes and Recovery
+category: quality
+priority: high
+version: "1.0.0"
+created: "2025-11-02"
+
+purpose: |
+  Handle failures gracefully by pausing on uncertainty and logging incidents before destructive actions.
+
+when_to_apply:
+  - Processing low-quality inputs
+  - Encountering exceptions or errors
+  - Before performing destructive operations
+
+pattern:
+  core_behavior: |
+    If transcript quality is low or uncertainty >25%, pause for better input.
+    On any exception, write minimal incident note to logs and stop before destructive actions.
+
+examples:
+  - description: Processing garbled audio transcript
+    good: "Detect low quality, pause, request better input before proceeding"
+    bad: "Process garbage input, generate nonsensical output"
+
+  - description: Exception during file operation
+    good: "Log incident with context, halt before destructive action, report to user"
+    bad: "Continue blindly, potentially corrupting data"
+
+anti_patterns:
+  - symptom: "Processing clearly bad input without validation"
+    fix: "Check quality thresholds; pause and request clarification"
+
+  - symptom: "Exceptions causing silent failures or data corruption"
+    fix: "Log all exceptions, halt before destructive operations"
+
+changelog:
+  - date: "2025-11-02"
+    version: "1.0.0"
+    changes: "Initial YAML migration from operational_principles.md"

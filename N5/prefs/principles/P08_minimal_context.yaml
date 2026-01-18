@@ -1,0 +1,38 @@
+---
+id: P8
+name: Minimal Context, Maximal Clarity
+category: communication
+priority: high
+version: "1.0.0"
+created: "2025-11-02"
+
+purpose: |
+  Keep prompts and context self-contained while avoiding excessive file loading. Load only what's needed for precision execution.
+
+when_to_apply:
+  - Designing prompts or instructions
+  - Loading context for task execution
+  - Building workflows or automations
+
+pattern:
+  core_behavior: |
+    Keep prompts self-contained with essential information.
+    Avoid excessive file loading; summon only what is needed.
+    Balance completeness with efficiency.
+
+examples:
+  - description: Creating workflow prompt
+    good: "Include key parameters and decision criteria inline; reference external files for deep details"
+    bad: "Load 20 reference files into context when only 2 are relevant"
+
+anti_patterns:
+  - symptom: "Loading entire file trees into context for simple tasks"
+    fix: "Identify minimal necessary context; load only relevant files"
+
+  - symptom: "Prompts require external knowledge to understand"
+    fix: "Make prompts self-contained with critical information inline"
+
+changelog:
+  - date: "2025-11-02"
+    version: "1.0.0"
+    changes: "Initial YAML migration from operational_principles.md"

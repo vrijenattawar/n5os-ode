@@ -1,0 +1,47 @@
+---
+id: P36
+name: Orchestration Pattern
+category: workflow
+priority: high
+version: 1.0
+created: 2025-11-02
+
+purpose: |
+  Multi-persona workflow for complex projects spanning multiple domains.
+
+when_to_apply:
+  - Work spans multiple domains (research → design → build → document)
+  - Single thread hitting context limits
+  - Distinct cognitive modes needed
+  - Multiple artifacts with different skillsets
+
+structure:
+  coordinator:
+    role: Strategist or Operator
+    responsibilities:
+      - Define phase boundaries and success criteria
+      - Spawn specialized threads
+      - Integrate results
+      - Identify gaps and blockers
+
+  specialists:
+    - Researcher: Information gathering
+    - Architect: System design
+    - Builder: Implementation
+    - Writer: Documentation
+    - Debugger: Problem diagnosis
+
+execution_rules:
+  1. Coordinator spawns specialists with clear objectives
+  2. Specialists work independently
+  3. Coordinator integrates results
+  4. Each phase has explicit success criteria
+  5. No phase starts with blockers
+
+anti_patterns:
+  - Single thread doing everything
+  - Unclear phase boundaries
+  - Missing success criteria
+  - No coordinator
+
+related: P37, P15, P23

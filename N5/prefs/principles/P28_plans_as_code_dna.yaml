@@ -1,0 +1,56 @@
+---
+id: P28
+name: Plans As Code DNA
+category: strategy
+priority: critical
+version: "1.0.0"
+created: "2025-11-02"
+
+purpose: |
+  Code quality is determined upstream in plans, not downstream in implementation. Plans are the DNA—code is the expression. With AI generation, plan quality directly determines code quality.
+
+when_to_apply:
+  - All AI-assisted code generation
+  - System specifications
+  - Feature design
+  - Architecture documentation
+  - Implementation planning
+
+pattern:
+  core_behavior: |
+    Quality happens during planning, not coding.
+    Write clear specifications with explicit trade-offs, documented assumptions, and defined success criteria.
+    Code generation is mechanical—planning is strategic.
+    Care deeply about plan quality because it directly generates code quality.
+
+examples:
+  - description: High-quality plan
+    good: "Spec includes: Purpose, Input/Output types, Behavior steps, Edge cases, Error handling, Success criteria. AI generates clean code that matches spec."
+    bad: "'Build a user login system' → vague spec generates messy code requiring heavy refactoring"
+  - description: Edge case planning
+    good: "Plan lists: empty input, malformed data, timeout scenarios, permission errors. Generated code handles all cases."
+    bad: "Discover edge cases during coding, patch them in, accumulate technical debt"
+  - description: Error handling upstream
+    good: "Plan specifies: FileNotFound → raise with message, PermissionError → log and retry, InvalidJSON → skip line with warning"
+    bad: "Figure out errors as they happen → inconsistent error handling throughout"
+
+anti_patterns:
+  - symptom: "'Fix it up during implementation' mindset"
+    fix: "Invest 70% of time in planning, 20% in review, 10% in execution"
+  - symptom: "Discovering edge cases while coding instead of during planning"
+    fix: "List all edge cases in specification before generating code"
+  - symptom: "Code is messy because plan was vague"
+    fix: "Write detailed, explicit plans—code quality follows plan quality"
+  - symptom: "Refactoring to clean up generated code"
+    fix: "Improve the plan and regenerate—don't patch poor plans with clever code"
+
+related_principles:
+  - P31: Own The Planning Process
+  - P30: Maintain Feel For Code
+  - P21: Document All Assumptions
+  - P2: Single Source of Truth
+
+changelog:
+  - date: "2025-11-02"
+    version: "1.0.0"
+    changes: "Initial YAML migration from P28-plans-as-code-dna.md"

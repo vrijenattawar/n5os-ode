@@ -1,0 +1,54 @@
+---
+id: P23
+name: Identify Trap Doors
+category: strategy
+priority: critical
+version: "1.0.0"
+created: "2025-11-02"
+
+purpose: |
+  Explicitly identify and document irreversible or high-cost decisions before committing to them. Recognize trap doors, evaluate alternatives, and choose deliberately.
+
+when_to_apply:
+  - System architecture decisions
+  - Data format selection
+  - Technology stack choices
+  - API design
+  - Schema design
+  - Framework selection
+
+pattern:
+  core_behavior: |
+    A trap door is a decision where choosing one path makes it expensive or impossible to reverse.
+    Recognize these moments, document alternatives considered, and make the choice deliberately not accidentally.
+    Document: What is the trap door? What are the options? What makes this irreversible? What is the choice and why?
+
+examples:
+  - description: Data format trap door
+    good: 'TRAP DOOR Storage format. Options JSONL vs SQLite. Choosing JSONL for simplicity. Reversible via migration but expensive.'
+    bad: 'Just use JSONL without recognizing it is a trap door'
+  - description: Async vs sync decision
+    good: 'TRAP DOOR Execution model. Sync simpler but limits scalability. Choosing sync, can refactor but touches 40% of codebase.'
+    bad: 'Going with sync without evaluating the lock-in'
+  - description: Framework choice
+    good: 'TRAP DOOR Web framework. Flask simple vs FastAPI modern. Choosing Flask. Migration would require rewriting route handlers.'
+    bad: 'Flask works, use it without recognizing switching cost'
+
+anti_patterns:
+  - symptom: 'Choosing technology casually without thinking about reversal cost'
+    fix: 'Ask: If this choice is wrong, what does it take to change it?'
+  - symptom: 'Committing to architecture implicitly through early implementation'
+    fix: 'Explicitly document the trap door before writing production code'
+  - symptom: 'Discovering months later that the choice was wrong and costly to fix'
+    fix: 'Identify trap doors during planning phase, not during crisis'
+
+related_principles:
+  - P27: Nemawashi Mode (explore alternatives)
+  - P24: Simulation Over Doing (prototype before committing)
+  - P31: Own The Planning Process
+  - P7: Idempotence and Dry-Run
+
+changelog:
+  - date: "2025-11-02"
+    version: "1.0.0"
+    changes: "Initial YAML migration from P23-identify-trap-doors.md"

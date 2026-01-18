@@ -1,0 +1,49 @@
+---
+id: P15
+name: Complete Before Claiming Complete
+category: quality
+priority: critical
+version: "1.0.0"
+created: "2025-11-02"
+
+purpose: |
+  Report accurate progress, never claim completion prematurely. Only mark tasks complete when all requirements are met and verified.
+
+when_to_apply:
+  - Multi-phase projects
+  - Automation workflows
+  - System migrations
+  - Integration work
+  - Any task with multiple deliverables
+
+pattern:
+  core_behavior: |
+    Track progress explicitly with quantitative metrics (e.g., "13/23 complete, 56%").
+    Test all success criteria before marking complete.
+    If blocked or uncertain, state what remains rather than claiming done.
+
+examples:
+  - description: Reporting progress on migration
+    good: 'Completed 13/23 files (56%). Remaining: validation scripts, documentation, integration tests'
+    bad: 'Done reported when only 59% complete'
+  - description: Multi-phase automation
+    good: 'Phase 1/3 complete (33%). Report generation done, Execution TODO, Validation TODO'
+    bad: 'Automation complete when only planning phase works'
+
+anti_patterns:
+  - symptom: 'Claiming done while significant work remains'
+    fix: 'Use quantitative progress metrics and explicit remaining work lists'
+  - symptom: 'Ambiguous status updates like mostly done or almost there'
+    fix: 'State exact completion percentage and what is left'
+  - symptom: 'Premature completion claims due to loss of context'
+    fix: 'Review all original requirements before claiming complete'
+
+related_principles:
+  - P18: State Verification is Mandatory
+  - P7: Idempotence and Dry-Run
+  - P16: Accuracy Over Sophistication
+
+changelog:
+  - date: "2025-11-02"
+    version: "1.0.0"
+    changes: "Initial YAML migration from quality.md"

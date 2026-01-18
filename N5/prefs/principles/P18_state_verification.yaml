@@ -1,0 +1,53 @@
+---
+id: P18
+name: State Verification is Mandatory
+category: quality
+priority: high
+version: "1.0.0"
+created: "2025-11-02"
+
+purpose: |
+  Confirm operations succeeded. Never assume writes or state changes worked—verify them explicitly.
+
+when_to_apply:
+  - File I/O operations
+  - Database writes
+  - API calls
+  - Multi-phase workflows
+  - State transitions
+  - Destructive operations
+
+pattern:
+  core_behavior: |
+    After any write operation, verify the result.
+    Check: file exists, size > 0, structure is valid, content matches intent.
+    For multi-step operations, checkpoint and verify after each step.
+
+examples:
+  - description: File write verification
+    good: "write() → verify_exists() → verify_size() → verify_structure()"
+    bad: "write(file, data) and assume success"
+  - description: Multi-phase operation
+    good: "Phase 1 complete ✓ (verified artifacts exist) → Phase 2 → verify → Phase 3"
+    bad: "Execute all phases, verify only at end"
+  - description: Exit codes for blocking behavior
+    good: "exit 0 (clean), exit 1 (issues detected, block), exit 2 (cannot determine)"
+    bad: "exit 0 always, or no exit code strategy"
+
+anti_patterns:
+  - symptom: "Write and assume success without verification"
+    fix: "Add read-after-write verification with structure validation"
+  - symptom: "No verification between phases in multi-step workflows"
+    fix: "Checkpoint and verify state after each phase"
+  - symptom: "Claiming complete without confirming state"
+    fix: "Verify all expected artifacts exist and are valid before reporting complete"
+
+related_principles:
+  - P15: Complete Before Claiming
+  - P19: Error Handling is Not Optional
+  - P5: Safety and Anti-Overwrite
+
+changelog:
+  - date: "2025-11-02"
+    version: "1.0.0"
+    changes: "Initial YAML migration from quality.md"

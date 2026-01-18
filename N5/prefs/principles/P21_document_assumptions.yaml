@@ -1,0 +1,55 @@
+---
+id: P21
+name: Document All Assumptions, Placeholders, and Stubs
+category: quality
+priority: high
+version: "1.0.0"
+created: "2025-11-02"
+
+purpose: |
+  Make temporary/incomplete implementations explicit and trackable. Never silently leave placeholder code without documentation.
+
+when_to_apply:
+  - System implementations with placeholder logic
+  - Scripts with stub functions
+  - Designs with assumptions about future work
+  - Any code with TODO or FIXME comments
+  - Handoff documentation
+
+pattern:
+  core_behavior: |
+    Track EVERY assumption made during implementation.
+    Document ALL placeholders (TODO, FIXME, placeholder for...).
+    List ALL stubs, simulations, or mock implementations.
+    Create a manifest of what is incomplete.
+
+examples:
+  - description: Placeholder function documentation
+    good: 'STUB comment: Returns empty list. Needs actual LLM extraction. Location line 45'
+    bad: 'TODO: implement later with no tracking'
+  - description: Assumptions manifest
+    good: 'ASSUMPTIONS.md with Assumptions made, Placeholders list, Stubs and simulations'
+    bad: 'Scattered TODO comments with no central tracking'
+  - description: API assumption
+    good: 'ASSUMPTION comment: API supports pagination (VERIFY with docs)'
+    bad: 'Assume API works a certain way without noting it'
+
+anti_patterns:
+  - symptom: 'Writing placeholder code and forgetting it exists'
+    fix: 'Create ASSUMPTIONS.md listing all placeholders with status and priority'
+  - symptom: 'Assuming someone will figure it out later'
+    fix: 'Document exactly what needs to be figured out and where'
+  - symptom: 'Leaving TODO comments without tracking them centrally'
+    fix: 'Maintain manifest of all TODOs with context and effort estimates'
+  - symptom: 'Treating placeholders as if they are real implementations'
+    fix: 'Add explicit guards like assert not IS_PRODUCTION or data_source equals real_api'
+
+related_principles:
+  - P16: Accuracy Over Sophistication
+  - P15: Complete Before Claiming
+  - P19: Error Handling is Not Optional
+
+changelog:
+  - date: "2025-11-02"
+    version: "1.0.0"
+    changes: "Initial YAML migration from quality.md"

@@ -1,0 +1,40 @@
+---
+id: P32
+name: Simple Over Easy
+category: design
+priority: critical
+version: "1.0.0"
+created: "2025-10-26"
+related: [P8, P20, P27]
+
+purpose: |
+  Choose simple (few intertwined concepts) over easy (familiar, convenient). Simple systems are maintainable. Easy systems become complex.
+
+when_to_apply:
+  - Choosing data storage
+  - Selecting libraries/frameworks
+  - Designing abstractions
+  - Evaluating alternatives
+
+pattern:
+  core_behavior: |
+    Simple = few braided concepts (objective, count them). Easy = familiar, near at hand (subjective). Choose simple even when less convenient.
+
+examples:
+  - description: Data storage choice
+    good: "Direct SQL + JSON: 3 independent concepts (connection, SQL, JSON). More explicit"
+    bad: "ORM framework: 7+ intertwined concepts (connection, schema, query generation, type coercion, transactions, caching, relationships)"
+
+anti_patterns:
+  - symptom: "'This framework does everything'"
+    fix: "Easy, not simple. Count the braids"
+  - symptom: "'It's just one line'"
+    fix: "Line count ≠ simplicity. Count concepts instead"
+
+changelog:
+  - date: "2025-10-26"
+    version: "1.0.0"
+    changes: "Initial principle from velocity coding talk"
+  - date: "2025-11-02"
+    version: "1.0.0"
+    changes: "Migrated to YAML format from markdown"

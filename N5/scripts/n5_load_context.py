@@ -1,15 +1,7 @@
-#!/usr/bin/env python3
 """
 N5 Load Context Utility
 Restores the "missing link" between intent and standards.
-Loads context bundles based on task type defined in N5/prefs/context_manifest.yaml
-
-Usage:
-    python3 n5_load_context.py build
-    python3 n5_load_context.py strategy
-    python3 n5_load_context.py "custom task description"
-
-Part of n5OS-Ode: https://github.com/vrijenattawar/n5os-ode
+Loads context bundles based on task type defined in N5/prefs/prefs.md.
 """
 
 import argparse
@@ -18,21 +10,29 @@ import sys
 import yaml
 from pathlib import Path
 from typing import List, Dict, Optional
+# Import N5 Memory Client (Hybrid Integration)
+# We assume N5 is in the path or relative.
+try:
+    ROOT = Path(__file__).resolve().parents[2]
+    if str(ROOT) not in sys.path:
+        sys.path.insert(0, str(ROOT))
+    from N5.cognition.n5_memory_client import N5MemoryClient
+    MEMORY_AVAILABLE = True
+except ImportError:
+    MEMORY_AVAILABLE = False
+
 
 # Base paths
 WORKSPACE = Path("/home/workspace")
 MANIFEST_PATH = WORKSPACE / "N5/prefs/context_manifest.yaml"
 
-
 def load_manifest() -> Dict:
-    """Load context manifest configuration."""
     if not MANIFEST_PATH.exists():
         print(f"Error: Manifest not found at {MANIFEST_PATH}")
         sys.exit(1)
     
     with open(MANIFEST_PATH, 'r') as f:
         return yaml.safe_load(f)
-
 
 def read_file(path_str: str) -> str:
     """Safely reads a file and returns formatted markdown block."""
@@ -46,12 +46,52 @@ def read_file(path_str: str) -> str:
             return f"\n\n<!-- FILE: {path_str} -->\n{content}\n<!-- END FILE -->\n"
     except Exception as e:
         return f"<!-- ERROR READING {path}: {e} -->"
+def search_memory(query: str, limit: int = 3) -> str:
+    """Query the N5 Brain for semantic context."""
+    if not MEMORY_AVAILABLE:
+        return "<!-- Memory Client Not Available -->"
+    
+    try:
+        client = N5MemoryClient()
+        # Only search if we have a real query, not just a mode keyword
+        if len(query.split()) < 2:
+            return "" 
+            
+        results = client.search(query, limit=limit)
+        if not results:
+            return ""
+            
+        output = ["\n<memory_context>"]
+        output.append(f"  <!-- Retrieved {len(results)} relevant blocks for '{query}' -->")
+        for res in results:
+            path = res.get('path', 'unknown')
+            lines = res.get('lines')
+            if isinstance(lines, (list, tuple)) and len(lines) == 2:
+                start, end = lines
+            else:
+                start = res.get('start_line', 0)
+                end = res.get('end_line', 0)
+
+            if start and end:
+                source = f"{path}:{start}-{end}"
+            else:
+                source = path
+
+            score = res.get('score', res.get('similarity', 0.0))
+            output.append(f"  <block source='{source}' score='{score:.2f}'>")
+            output.append(res.get('content', ''))
+            output.append("  </block>")
+        output.append("</memory_context>\n")
+        return "\n".join(output)
+        
+    except Exception as e:
+        return f"<!-- Memory Search Error: {e} -->"
 
 
 def determine_group_from_intent(intent: str, groups: Dict) -> str:
     """
     Dynamic Logic: Maps natural language intent to a context group.
-    Uses keyword matching.
+    Uses keyword matching (Simple Over Easy).
     """
     intent = intent.lower()
     
@@ -59,122 +99,78 @@ def determine_group_from_intent(intent: str, groups: Dict) -> str:
     keywords = {
         "build": ["code", "fix", "bug", "implement", "refactor", "script", "python", "error"],
         "strategy": ["plan", "think", "reason", "design", "approach", "why", "architect"],
-        "system": ["database", "list", "index", "schema", "ops", "organize"],
-        "safety": ["delete", "move", "remove", "dangerous", "destroy"],
-        "scheduler": ["schedule", "agent", "automate", "cron", "recurring", "timer"],
-        "writer": ["write", "draft", "email", "communicate", "content", "letter", "message"],
-        "research": ["research", "deep dive", "analyze", "investigate", "study"],
+        "scheduler": ["agent", "schedule", "task", "automation", "cron", "run"],
+        "system": ["list", "index", "db", "database", "ops", "admin"],
+        "safety": ["delete", "remove", "clean", "purge", "destroy"],
+        "writer": ["email", "write", "draft", "post", "message", "content", "blog", "article"],
+        "research": ["research", "find", "look up", "investigate", "search", "analyze"]
     }
     
-    # Score each group
-    scores = {group: 0 for group in keywords}
-    for group, kws in keywords.items():
-        for kw in kws:
-            if kw in intent:
-                scores[group] += 1
-    
-    # Find best match
-    best_group = max(scores, key=scores.get)
-    if scores[best_group] == 0:
-        return "build"  # Default fallback
-    
-    return best_group
-
-
-def load_context(category: str, manifest: Dict = None) -> str:
-    """Load context files for a given category."""
-    if manifest is None:
-        manifest = load_manifest()
-    
-    groups = manifest.get("groups", {})
-    
-    # Check if category is a known group
-    if category in groups:
-        group = groups[category]
-    else:
-        # Try to infer from intent
-        inferred = determine_group_from_intent(category, groups)
-        if inferred in groups:
-            print(f"Inferred context group: {inferred}")
-            group = groups[inferred]
-        else:
-            print(f"Warning: Unknown category '{category}', using minimal context")
-            return ""
-    
-    # Load files
-    files = group.get("files", [])
-    output_parts = []
-    
-    output_parts.append(f"## Context: {category}")
-    if group.get("description"):
-        output_parts.append(f"*{group['description']}*\n")
-    
-    loaded_count = 0
-    for file_path in files:
-        content = read_file(file_path)
-        if "MISSING FILE" not in content and "ERROR READING" not in content:
-            output_parts.append(content)
-            loaded_count += 1
-        else:
-            output_parts.append(content)  # Include error message
-    
-    output_parts.append(f"\n<!-- Loaded {loaded_count}/{len(files)} context files -->")
-    
-    return "\n".join(output_parts)
-
-
-def list_groups(manifest: Dict = None) -> None:
-    """List all available context groups."""
-    if manifest is None:
-        manifest = load_manifest()
-    
-    groups = manifest.get("groups", {})
-    
-    print("\nAvailable Context Groups:")
-    print("=" * 50)
-    for name, group in sorted(groups.items()):
-        desc = group.get("description", "No description")
-        files = group.get("files", [])
-        print(f"\n  {name}")
-        print(f"    {desc}")
-        print(f"    Files: {len(files)}")
-
+    # Check against manifest groups
+    for group_name, terms in keywords.items():
+        if group_name in groups: # Only match if group exists in manifest
+            for term in terms:
+                if term in intent:
+                    return group_name
+                    
+    return "general" # Default to general if no match found
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Load context files for specific task types",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
-Examples:
-    python3 n5_load_context.py build          # Load build context
-    python3 n5_load_context.py strategy       # Load strategy context
-    python3 n5_load_context.py --list         # List available groups
-    python3 n5_load_context.py "fix this bug" # Infer from description
-        """
-    )
-    
-    parser.add_argument("category", nargs="?", help="Context category or task description")
-    parser.add_argument("--list", "-l", action="store_true", help="List available context groups")
-    parser.add_argument("--quiet", "-q", action="store_true", help="Suppress info messages")
-    
+    parser = argparse.ArgumentParser(description="N5 Dynamic Context Loader")
+    parser.add_argument("input", help="Mode name (e.g., 'build') or Intent string (e.g., 'fix the script')")
     args = parser.parse_args()
-    
-    manifest = load_manifest()
-    
-    if args.list:
-        list_groups(manifest)
-        return 0
-    
-    if not args.category:
-        parser.print_help()
-        return 1
-    
-    context = load_context(args.category, manifest)
-    print(context)
-    
-    return 0
 
+    manifest = load_manifest()
+    groups = manifest.get("groups", {})
+    
+    target_group = None
+    is_fallback = False
+    
+    # 1. Check if input is a direct mode match
+    if args.input in groups:
+        target_group = args.input
+        print(f"> **Context Loader:** Mode `{target_group}` detected.")
+        
+    # 2. Check if input is an intent (Dynamic Mode)
+    else:
+        target_group = determine_group_from_intent(args.input, groups)
+        if target_group == "general":
+             is_fallback = True
+             print(f"> **Context Loader:** Novel context detected (intent: `{args.input}`).")
+             print(f"> **Action:** Loading `general` context. Consider defining a new category for this workflow.")
+        else:
+             print(f"> **Context Loader:** Intent `{args.input}` mapped to mode `{target_group}`.")
+
+    # 3. Load Content
+    if target_group not in groups:
+         print(f"Error: Target group `{target_group}` not found in manifest.")
+         return
+
+    files_to_load = groups[target_group]["files"]
+    
+    output = []
+    output.append(f"> **N5 Context Injection**")
+    output.append(f"> Target: `{target_group}`")
+    output.append(f"> Injecting {len(files_to_load)} context files...")
+    
+    print("\n".join(output))
+    
+    for file_path in files_to_load:
+        print(read_file(file_path))
+    
+    # 4. Inject Memory (Hybrid Layer)
+    # We query the brain using the original input intent
+    memory_block = search_memory(args.input)
+    if memory_block:
+        print(memory_block)
+        print(f"> **Context Loader:** Injected semantic memory.")
+        
+    print(f"\n> **Context Loaded.** System ready for `{target_group}` operations.")
 
 if __name__ == "__main__":
-    sys.exit(main())
+    main()
+
+
+
+
 

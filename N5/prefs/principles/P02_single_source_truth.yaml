@@ -1,0 +1,35 @@
+---
+id: P2
+name: Single Source of Truth (SSOT)
+category: quality
+priority: high
+version: "1.0.0"
+created: "2025-11-02"
+
+purpose: |
+  Maintain exactly one canonical location for each piece of information to prevent drift and inconsistency.
+
+when_to_apply:
+  - Storing factual information or specifications
+  - Creating reference documentation
+  - Managing configuration or settings
+
+pattern:
+  core_behavior: |
+    Each fact lives in exactly one canonical location.
+    All other references link to the canonical source rather than duplicating content.
+    Update only the single source; never sync duplicates manually.
+
+examples:
+  - description: Project requirements
+    good: "Single requirements.md file; other docs link to specific sections"
+    bad: "Requirements copied into multiple docs, creating sync nightmare"
+
+anti_patterns:
+  - symptom: "Same information appears verbatim in multiple files"
+    fix: "Choose canonical location, replace other instances with links"
+
+changelog:
+  - date: "2025-11-02"
+    version: "1.0.0"
+    changes: "Initial YAML migration from operational_principles.md"

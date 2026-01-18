@@ -1,0 +1,38 @@
+---
+id: P13
+name: Naming and Placement
+category: code_patterns
+priority: medium
+version: "1.0.0"
+created: "2025-11-02"
+
+purpose: |
+  Use consistent naming conventions and file placement. Ask for clarification on ambiguous locations.
+
+when_to_apply:
+  - Creating new files or directories
+  - Organizing content in workspace
+  - Establishing file naming patterns
+
+pattern:
+  core_behavior: |
+    Follow established conventions for file organization.
+    Use descriptive, consistent names.
+    Ask for location if ambiguous; never create new roots without consent.
+
+examples:
+  - description: Saving meeting notes
+    good: "Store in appropriate directory using consistent naming pattern"
+    bad: "Create random directory without asking"
+
+anti_patterns:
+  - symptom: "Creating new top-level directories without user approval"
+    fix: "Ask where to place content if location is ambiguous"
+
+  - symptom: "Inconsistent naming making files hard to find"
+    fix: "Follow established patterns; use descriptive, consistent names"
+
+changelog:
+  - date: "2025-11-02"
+    version: "1.0.0"
+    changes: "Initial YAML migration from operational_principles.md"
