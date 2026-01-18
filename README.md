@@ -177,6 +177,17 @@ Dynamic context injection by task category:
 
 → See [docs/CONTEXT_LOADING.md](docs/CONTEXT_LOADING.md) for details
 
+### Sites Protocol
+
+Structured deployment workflow for web applications:
+
+- Staging vs production separation
+- Service naming and port conventions
+- Promotion workflow (staging → prod)
+- Site protection rules
+
+→ See [docs/SITES.md](docs/SITES.md) for deployment patterns
+
 ---
 
 ## Requirements
@@ -240,6 +251,7 @@ N5OS Ode is built on these beliefs:
 | [SEMANTIC_MEMORY.md](docs/SEMANTIC_MEMORY.md) | Optional memory layer setup |
 | [CONVERSATION_END.md](docs/CONVERSATION_END.md) | Tiered conversation close |
 | [CONTEXT_LOADING.md](docs/CONTEXT_LOADING.md) | Dynamic context injection |
+| [SITES.md](docs/SITES.md) | Sites protocol, staging/prod patterns, service conventions |
 
 ---
 
