@@ -99,6 +99,8 @@ Routes to the research specialist.
 
 → See [docs/PERSONAS.md](docs/PERSONAS.md) for full details
 
+→ See [docs/ROUTING.md](docs/ROUTING.md) for persona choreography
+
 ### Behavioral Rules
 
 6 core rules that shape AI behavior:
@@ -111,6 +113,20 @@ Routes to the research specialist.
 6. **Clarifying Questions** — Reduces mistakes from ambiguity
 
 → See [docs/RULES.md](docs/RULES.md) for full details
+
+### Principles Library
+
+18 codified architectural principles that shape how N5OS thinks:
+
+- **P15** — Complete Before Claiming (prevents false "done")
+- **P28** — Plans as Code DNA (quality happens in planning)
+- **P32** — Simple Over Easy (Rich Hickey's wisdom)
+- **P23** — Identify Trap Doors (flag irreversible decisions)
+- **P36** — Orchestration Pattern (multi-persona workflows)
+
+Plus 13 more principles covering safety, modularity, error handling, and more.
+
+→ See [docs/PRINCIPLES.md](docs/PRINCIPLES.md) for full details
 
 ### Block System
 
@@ -136,6 +152,30 @@ If you have an OpenAI API key, N5OS Ode can build a semantic memory layer:
 - Provides context-aware retrieval
 
 → See [docs/SEMANTIC_MEMORY.md](docs/SEMANTIC_MEMORY.md) for setup
+
+### Conversation End System
+
+Tiered conversation hygiene based on conversation complexity:
+
+- **Tier 1 (Quick)** — Simple Q&A, no commits needed
+- **Tier 2 (Standard)** — Research/discussion with artifacts
+- **Tier 3 (Full Build)** — Major changes, full documentation
+
+Supports Worker vs Full mode for orchestrated multi-conversation builds.
+
+→ See [docs/CONVERSATION_END.md](docs/CONVERSATION_END.md) for details
+
+### Context Loading
+
+Dynamic context injection by task category:
+
+- `build` — Coding, implementations
+- `strategy` — Planning, decisions
+- `research` — Deep analysis, synthesis
+- `safety` — Destructive operations
+- Plus `system`, `scheduler`, `writer`, `health`
+
+→ See [docs/CONTEXT_LOADING.md](docs/CONTEXT_LOADING.md) for details
 
 ---
 
@@ -192,10 +232,14 @@ N5OS Ode is built on these beliefs:
 |-----|-------------|
 | [PHILOSOPHY.md](docs/PHILOSOPHY.md) | Why N5OS exists, core concepts |
 | [PERSONAS.md](docs/PERSONAS.md) | Specialist personas, routing |
+| [ROUTING.md](docs/ROUTING.md) | Persona choreography, handoffs |
 | [RULES.md](docs/RULES.md) | Behavioral rules, customization |
+| [PRINCIPLES.md](docs/PRINCIPLES.md) | 18 architectural principles |
 | [FOLDER_STRUCTURE.md](docs/FOLDER_STRUCTURE.md) | Directory layout, conventions |
 | [BLOCK_SYSTEM.md](docs/BLOCK_SYSTEM.md) | Block generators for transcripts |
 | [SEMANTIC_MEMORY.md](docs/SEMANTIC_MEMORY.md) | Optional memory layer setup |
+| [CONVERSATION_END.md](docs/CONVERSATION_END.md) | Tiered conversation close |
+| [CONTEXT_LOADING.md](docs/CONTEXT_LOADING.md) | Dynamic context injection |
 
 ---
 
