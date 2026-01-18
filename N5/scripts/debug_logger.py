@@ -1,26 +1,29 @@
 #!/usr/bin/env python3
 """
-Debug Logger - Track debugging attempts and detect circular patterns
+Debug Logger - Track problem-solving attempts in build/debug conversations
+
+Principles: P2 (SSOT), P19 (Error Handling), P28 (Fast Feedback)
 
 Usage:
-    debug_logger.py append --component X --problem "Y" --hypothesis "Z" --actions "A,B" --outcome success|failure
-    debug_logger.py recent [--limit N]
-    debug_logger.py patterns [--window N] [--threshold N]
-
-Commands:
-    append    - Add a new debug log entry
-    recent    - Show recent debug attempts
-    patterns  - Detect circular debugging patterns
-
-Part of n5OS-Ode: https://github.com/vrijenattawar/n5os-ode
+    # Append entry
+    python3 debug_logger.py append --component "api.py" --problem "Rate limit 429" \\
+        --hypothesis "Add backoff" --actions "Added exponential backoff" \\
+        --outcome "success" --notes "5s, 15s, 45s worked"
+    
+    # Check recent
+    python3 debug_logger.py recent --n 5
+    
+    # Detect patterns
+    python3 debug_logger.py patterns --window 10
 """
 
 import argparse
 import json
 import logging
-import os
 import sys
-from datetime import datetime, timezone
+import uuid
+from datetime import datetime, UTC
+from difflib import SequenceMatcher
 from pathlib import Path
 from typing import List, Dict, Optional
 
@@ -33,101 +36,79 @@ logger = logging.getLogger(__name__)
 
 
 class DebugLogger:
-    """Track debugging attempts and detect circular patterns."""
+    def __init__(self, convo_id: str):
+        self.convo_id = convo_id
+        self.workspace = Path(f"/home/.z/workspaces/{convo_id}")
+        self.log_file = self.workspace / "DEBUG_LOG.jsonl"
+        
+        self.workspace.mkdir(parents=True, exist_ok=True)
     
-    def __init__(self, log_path: Optional[Path] = None):
-        """Initialize with optional custom log path."""
-        if log_path:
-            self.log_path = Path(log_path)
-        else:
-            # Default to conversation workspace if available
-            convo_workspace = os.environ.get("CONVERSATION_WORKSPACE")
-            if convo_workspace:
-                self.log_path = Path(convo_workspace) / "DEBUG_LOG.jsonl"
-            else:
-                # Fallback to N5 runtime
-                self.log_path = Path("/home/workspace/N5/runtime/DEBUG_LOG.jsonl")
-        
-        self.log_path.parent.mkdir(parents=True, exist_ok=True)
-    
-    def append(self, component: str, problem: str, hypothesis: str,
-               actions: List[str], outcome: str, notes: str = None) -> Dict:
-        """
-        Log a debug attempt.
-        
-        Args:
-            component: System/file/area being debugged
-            problem: Description of the issue
-            hypothesis: What we thought was wrong
-            actions: List of actions taken
-            outcome: "success", "failure", or "partial"
-            notes: Optional additional notes
-        
-        Returns:
-            The logged entry
-        """
-        entry = {
-            "entry_id": self._generate_id(),
-            "ts": datetime.now(timezone.utc).isoformat(),
-            "component": component,
-            "problem": problem,
-            "hypothesis": hypothesis,
-            "actions": actions if isinstance(actions, list) else [actions],
-            "outcome": outcome,
-        }
-        
-        if notes:
-            entry["notes"] = notes
-        
-        # Append to log
-        with open(self.log_path, "a") as f:
-            f.write(json.dumps(entry) + "\n")
-        
-        logger.info(f"Logged debug attempt: {component} [{outcome}]")
-        return entry
+    def append(
+        self,
+        component: str,
+        problem: str,
+        hypothesis: str,
+        actions: List[str],
+        outcome: str,
+        notes: str = ""
+    ) -> Dict:
+        """Append debug entry to log."""
+        try:
+            if outcome not in ["success", "failure", "partial"]:
+                raise ValueError(f"Invalid outcome: {outcome}. Must be success|failure|partial")
+            
+            entry = {
+                "ts": datetime.now(UTC).isoformat(),
+                "entry_id": str(uuid.uuid4())[:8],
+                "component": component,
+                "problem": problem,
+                "hypothesis": hypothesis,
+                "actions": actions if isinstance(actions, list) else [actions],
+                "outcome": outcome,
+                "notes": notes,
+                "conv_id": self.convo_id
+            }
+            
+            with self.log_file.open("a") as f:
+                f.write(json.dumps(entry) + "\n")
+            
+            logger.info(f"✓ Logged {outcome} for {component}: {problem[:50]}...")
+            return entry
+            
+        except Exception as e:
+            logger.error(f"Failed to append debug entry: {e}", exc_info=True)
+            raise
     
     def read_all(self) -> List[Dict]:
-        """Read all log entries."""
-        if not self.log_path.exists():
-            return []
-        
-        entries = []
-        with open(self.log_path, "r") as f:
-            for line in f:
-                line = line.strip()
-                if line:
-                    try:
+        """Read all entries from log."""
+        try:
+            if not self.log_file.exists():
+                return []
+            
+            entries = []
+            with self.log_file.open() as f:
+                for line in f:
+                    if line.strip():
                         entries.append(json.loads(line))
-                    except json.JSONDecodeError:
-                        continue
-        
-        return entries
+            
+            return entries
+            
+        except Exception as e:
+            logger.error(f"Failed to read debug log: {e}", exc_info=True)
+            return []
     
-    def recent(self, limit: int = 10) -> List[Dict]:
-        """Get recent entries."""
+    def recent(self, n: int = 5) -> List[Dict]:
+        """Get last N entries."""
         entries = self.read_all()
-        return entries[-limit:] if len(entries) > limit else entries
+        return entries[-n:] if entries else []
     
-    def _generate_id(self) -> str:
-        """Generate a unique entry ID."""
-        import hashlib
-        ts = datetime.now(timezone.utc).isoformat()
-        return hashlib.sha256(ts.encode()).hexdigest()[:8]
+    @staticmethod
+    def _similarity(s1: str, s2: str) -> float:
+        """Calculate similarity ratio between two strings."""
+        return SequenceMatcher(None, s1.lower(), s2.lower()).ratio()
     
-    def _similarity(self, s1: str, s2: str) -> float:
-        """Calculate text similarity using simple Jaccard coefficient."""
-        words1 = set(s1.lower().split())
-        words2 = set(s2.lower().split())
-        
-        if not words1 or not words2:
-            return 0.0
-        
-        intersection = words1 & words2
-        union = words1 | words2
-        
-        return len(intersection) / len(union) if union else 0.0
-    
-    def _shared_keywords(self, s1: str, s2: str, min_length: int = 4) -> float:
+    @staticmethod
+    def _shared_keywords(s1: str, s2: str, min_length: int = 4) -> float:
         """Calculate percentage of shared meaningful keywords."""
         words1 = set(w.lower() for w in s1.split() if len(w) >= min_length)
         words2 = set(w.lower() for w in s2.split() if len(w) >= min_length)
@@ -214,7 +195,7 @@ class DebugLogger:
                     f"Component: {p['component']}\n"
                     f"Problem: {p['problem'][:80]}...\n"
                     f"Attempts: {p['count']} similar failures\n"
-                    f"→ Consider: Different approach or stepping back to reassess"
+                    f"→ Consider: Different approach, load Debugger mode, or ask V for guidance"
                 )
             
             return {
@@ -264,69 +245,68 @@ class DebugLogger:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Debug Logger")
-    subparsers = parser.add_subparsers(dest="command", help="Commands")
+    parser = argparse.ArgumentParser(description="Debug Logger for build/debug conversations")
+    subparsers = parser.add_subparsers(dest="command", required=True)
     
     # Append command
-    append_parser = subparsers.add_parser("append", help="Log a debug attempt")
-    append_parser.add_argument("--component", required=True, help="Component being debugged")
+    append_parser = subparsers.add_parser("append", help="Add debug entry")
+    append_parser.add_argument("--convo-id", required=True, help="Conversation ID")
+    append_parser.add_argument("--component", required=True, help="Component/file being worked on")
     append_parser.add_argument("--problem", required=True, help="Problem description")
-    append_parser.add_argument("--hypothesis", required=True, help="What we thought was wrong")
-    append_parser.add_argument("--actions", required=True, help="Actions taken (comma-separated)")
+    append_parser.add_argument("--hypothesis", required=True, help="Hypothesis for fix")
+    append_parser.add_argument("--actions", required=True, nargs="+", help="Actions taken")
     append_parser.add_argument("--outcome", required=True, choices=["success", "failure", "partial"])
-    append_parser.add_argument("--notes", help="Additional notes")
-    append_parser.add_argument("--log-path", help="Custom log file path")
+    append_parser.add_argument("--notes", default="", help="Additional notes")
     
     # Recent command
     recent_parser = subparsers.add_parser("recent", help="Show recent entries")
-    recent_parser.add_argument("--limit", type=int, default=10, help="Number of entries")
-    recent_parser.add_argument("--log-path", help="Custom log file path")
+    recent_parser.add_argument("--convo-id", required=True)
+    recent_parser.add_argument("--n", type=int, default=5, help="Number of entries")
+    recent_parser.add_argument("--format", choices=["json", "display"], default="display")
     
     # Patterns command
     patterns_parser = subparsers.add_parser("patterns", help="Detect circular patterns")
+    patterns_parser.add_argument("--convo-id", required=True)
     patterns_parser.add_argument("--window", type=int, default=10, help="Window size")
     patterns_parser.add_argument("--threshold", type=int, default=3, help="Pattern threshold")
-    patterns_parser.add_argument("--log-path", help="Custom log file path")
     
     args = parser.parse_args()
     
-    if not args.command:
-        parser.print_help()
-        return 1
-    
-    log_path = Path(args.log_path) if hasattr(args, 'log_path') and args.log_path else None
-    debug_log = DebugLogger(log_path)
+    logger = DebugLogger(args.convo_id)
     
     if args.command == "append":
-        actions = [a.strip() for a in args.actions.split(",")]
-        entry = debug_log.append(
+        logger.append(
             component=args.component,
             problem=args.problem,
             hypothesis=args.hypothesis,
-            actions=actions,
+            actions=args.actions,
             outcome=args.outcome,
             notes=args.notes
         )
-        print(json.dumps(entry, indent=2))
-        return 0
-        
+    
     elif args.command == "recent":
-        entries = debug_log.recent(args.limit)
-        print(debug_log.format_display(entries))
-        return 0
-        
+        entries = logger.recent(args.n)
+        if args.format == "json":
+            print(json.dumps(entries, indent=2))
+        else:
+            print(logger.format_display(entries))
+    
     elif args.command == "patterns":
-        result = debug_log.detect_patterns(args.window, args.threshold)
+        result = logger.detect_patterns(window=args.window, threshold=args.threshold)
         if result["warning"]:
             print(result["warning"])
         else:
             print("✓ No circular patterns detected")
-        print(json.dumps(result, indent=2))
-        return 0
-    
-    return 0
+        print(f"\nPatterns found: {len(result['patterns'])}")
+        if result["patterns"]:
+            print(json.dumps(result["patterns"], indent=2))
 
 
 if __name__ == "__main__":
-    sys.exit(main())
-
+    try:
+        main()
+    except KeyboardInterrupt:
+        sys.exit(0)
+    except Exception as e:
+        logging.error(f"Fatal error: {e}", exc_info=True)
+        sys.exit(1)
