@@ -617,13 +617,14 @@ print('✓ Test file indexed successfully')
 
 ## Phase 6: Validate Installation
 
-After completing phases 1-5, verify:
+After completing phases 1-6, verify:
 
 1. **Personas exist**: List personas and confirm all 6 Ode personas are present
 2. **Rules exist**: List rules and confirm all 6 core rules are present
 3. **Folders exist**: Verify N5/, Knowledge/, Records/, Prompts/ structure
 4. **Files exist**: Confirm prefs.md and context_manifest.yaml exist
 5. **Semantic memory**: Confirm N5/cognition/brain.db exists
+6. **Git initialized** (optional): Confirm .git directory and .gitignore exist if git was set up
 
 ### Validation Commands
 
@@ -645,6 +646,275 @@ ls -la N5/cognition/brain.db
 ---
 
 ## Post-Installation
+## Phase 7: Git/GitHub Initialization (Optional but Recommended)
+
+This phase sets up version control for your N5OS workspace. Git integration is optional but strongly recommended for:
+
+- **Backup protection**: Your workspace changes are tracked and recoverable
+- **Experimentation**: Branch out for experiments without affecting your main setup
+- **Collaboration**: Share your N5OS configuration or work with others
+- **Migration**: Easy to move your workspace between machines
+
+### 7.1 Check if Git is Already Initialized
+
+```bash
+# Check if .git directory exists
+if [ -d .git ]; then
+    echo "✓ Git repository already initialized"
+    GIT_INITIALIZED=true
+else
+    echo "Git not initialized yet"
+    GIT_INITIALIZED=false
+fi
+```
+
+### 7.2 Initialize Git Repository
+
+Only run this if `GIT_INITIALIZED=false`:
+
+```bash
+# Initialize git repo
+git init
+
+# Configure user info (optional - use global git config if set)
+if [ -z "$(git config user.name)" ]; then
+    echo "⚠️ Git user.name not configured. Run: git config --global user.name 'Your Name'"
+fi
+if [ -z "$(git config user.email)" ]; then
+    echo "⚠️ Git user.email not configured. Run: git config --global user.email 'your@email.com'"
+fi
+
+echo "✓ Git repository initialized"
+```
+
+### 7.3 Create/Update .gitignore
+
+Create a `.gitignore` file in the workspace root with sensible defaults:
+
+```bash
+cat > .gitignore << 'EOF'
+# Zo / N5OS specific
+SESSION_STATE.md
+DEBUG_LOG.jsonl
+*.transcript.jsonl
+
+# Environment and secrets
+.env
+.env.*
+*.key
+*.pem
+
+# Logs and temporary files
+*.log
+*.tmp
+*.cache
+*.swp
+*.swo
+*~
+
+# Node modules
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Python
+__pycache__/
+*.py[cod]*
+*$py.class
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+ENV/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.sublime-*
+.DS_Store
+
+# Temporary workspace files (conversation workspaces are auto-managed)
+*.tmp
+
+# Semantic memory database (optional - uncomment if you want to exclude)
+# N5/cognition/brain.db
+
+# Index and search indices (optional - uncomment if you want to exclude)
+# *.idx
+# *.lucene
+EOF
+
+echo "✓ .gitignore created/updated"
+```
+
+### 7.4 Optional: Configure GitHub Remote
+
+Ask the user if they want to set up GitHub integration. This is optional.
+
+#### 7.4.1 Check for GitHub CLI Availability
+
+```bash
+if command -v gh &> /dev/null; then
+    echo "✓ GitHub CLI (gh) is available"
+    GH_AVAILABLE=true
+else
+    echo "⚠️ GitHub CLI (gh) not found. Install from: https://cli.github.com/"
+    GH_AVAILABLE=false
+fi
+```
+
+#### 7.4.2 Prompt User for GitHub Setup
+
+Ask the user:
+
+```
+Would you like to set up GitHub integration? This will:
+1. Create a new GitHub repository for your N5OS workspace
+2. Connect your local git repo to GitHub
+3. Push your initial commit
+
+Please provide:
+- Your GitHub username (or type 'skip' to skip this step)
+- Repository name (default: n5os-ode-workspace)
+- Public or private (default: private)
+```
+
+#### 7.4.3 Create GitHub Repository (If gh CLI Available)
+
+If user provides GitHub username and `GH_AVAILABLE=true`:
+
+```bash
+# User inputs: GITHUB_USERNAME, REPO_NAME, VISIBILITY (public/private)
+
+# Create remote repository
+gh repo create $REPO_NAME \
+  --description "N5OS Ode workspace - Personal OS for Zo" \
+  --$VISIBILITY \
+  --source=. \
+  --remote=origin \
+  --push
+
+echo "✓ GitHub repository created and initial commit pushed"
+echo "🔗 Repository URL: https://github.com/$GITHUB_USERNAME/$REPO_NAME"
+```
+
+#### 7.4.4 Manual GitHub Setup (If gh CLI Not Available)
+
+If `GH_AVAILABLE=false` but user wants GitHub:
+
+```
+To set up GitHub manually:
+
+1. Go to https://github.com/new
+2. Create a new repository named: [REPO_NAME]
+3. Choose [public/private] visibility
+4. DO NOT initialize with README, .gitignore, or license (we already have them)
+5. After creating, run these commands:
+
+   git remote add origin https://github.com/[GITHUB_USERNAME]/[REPO_NAME].git
+   git branch -M main
+   git push -u origin main
+```
+
+### 7.5 Make Initial Commit
+
+Whether or not GitHub is configured, create an initial commit:
+
+```bash
+# Add all files to git
+git add .
+
+# Create initial commit
+git commit -m "Initial commit: N5OS Ode installation
+
+- Installed 6 specialist personas (Operator, Builder, Writer, Strategist, Debugger, Researcher)
+- Configured 6 core rules (session state, YAML frontmatter, progress reporting, file protection, debug logging, clarifying questions)
+- Created folder structure (N5/, Knowledge/, Records/, Prompts/)
+- Initialized core files (prefs.md, context_manifest.yaml)
+- Set up semantic memory infrastructure
+- Configured .gitignore
+
+N5OS Ode v1.0 — A lightweight personal operating system for Zo"
+
+# Set main as default branch (if not already)
+git branch -M main
+
+echo "✓ Initial commit created"
+```
+
+### 7.6 Push to GitHub (If Remote Configured)
+
+If GitHub remote was set up:
+
+```bash
+# Push to GitHub
+git push -u origin main
+
+echo "✓ Changes pushed to GitHub"
+```
+
+### 7.7 Git Validation Checklist
+
+After completing git setup, verify:
+
+```bash
+# Check git status
+git status
+
+# Check git log
+git log --oneline
+
+# Check remote (if configured)
+git remote -v
+
+# Check .gitignore
+cat .gitignore
+```
+
+### Git Best Practices
+
+- **Commit frequently**: Small, focused commits are easier to understand and revert
+- **Write clear messages**: Summarize what changed and why (50-char subject line is ideal)
+- **Use branches**: For experiments or major changes, create a feature branch
+- **Pull before pushing**: If collaborating, always pull changes before pushing
+- **Backup regularly**: Push to GitHub frequently to protect your work
+
+### Troubleshooting Git Issues
+
+**"fatal: not a git repository"**
+- Run `git init` from your workspace root
+
+**"Nothing added to commit"**
+- All files are already committed or in .gitignore
+- Check `git status` to see untracked files
+
+**"gh: command not found"**
+- Install GitHub CLI: https://cli.github.com/
+- Or use manual GitHub setup (see section 7.4.4)
+
+**"Permission denied (publickey)"**
+- Set up SSH keys for GitHub: https://docs.github.com/authentication/connecting-to-github-with-ssh
+- Or use HTTPS URLs instead of SSH
+
+---
+
 
 ### Next Steps
 

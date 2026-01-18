@@ -261,9 +261,11 @@ N5OS Ode is built on these beliefs:
 | [PRINCIPLES.md](docs/PRINCIPLES.md) | 18 architectural principles |
 | [FOLDER_STRUCTURE.md](docs/FOLDER_STRUCTURE.md) | Directory layout, conventions |
 | [BLOCK_SYSTEM.md](docs/BLOCK_SYSTEM.md) | Block generators for transcripts |
+| [BUILD_PLANNING.md](docs/BUILD_PLANNING.md) | Build planning system, templates, and execution flow |
 | [SEMANTIC_MEMORY.md](docs/SEMANTIC_MEMORY.md) | Optional memory layer setup |
 | [CONVERSATION_END.md](docs/CONVERSATION_END.md) | Tiered conversation close |
 | [CONTEXT_LOADING.md](docs/CONTEXT_LOADING.md) | Dynamic context injection |
+| [DEBUG_SYSTEM.md](docs/DEBUG_SYSTEM.md) | Debug logging, pattern detection, troubleshooting reflexes |
 | [SAFETY.md](docs/SAFETY.md) | Protection mechanisms and usage |
 | [SITES.md](docs/SITES.md) | Sites protocol, staging/prod patterns, service conventions |
 

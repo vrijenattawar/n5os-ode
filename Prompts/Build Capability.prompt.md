@@ -21,9 +21,11 @@ tool: true
    ```bash
    python3 N5/scripts/init_build.py <slug> --title "<Capability Name>"
    ```
-3. **Create plan** in `builds/<slug>/PLAN.md` following the planning template
-4. **Review plan** — present for approval
-5. **On approval:** Execute the build
+3. **Activate Architect** (`set_active_persona("74e0a70d-398a-4337-bcab-3e5a3a9d805c")`)
+4. **Architect creates plan** in `N5/builds/<slug>/PLAN.md` following template
+5. **Invoke Level Upper** for counterintuitive review (experimental)
+6. **Present plan** for approval
+7. **On approval:** Hand off to Builder for execution
 
 ## Slug Convention
 
@@ -38,13 +40,16 @@ User says: "I want to build a meeting summarizer capability"
 
 1. Slug: `meeting-summarizer`
 2. Run: `python3 N5/scripts/init_build.py meeting-summarizer --title "Meeting Summarizer"`
-3. Create plan in `builds/meeting-summarizer/PLAN.md`
-4. Present for approval
+3. Activate Architect
+4. Create plan in `N5/builds/meeting-summarizer/PLAN.md`
+5. Present for approval
 
 ## Reference
 
-- **Scripts:** `file 'N5/scripts/init_build.py'` creates the build folder structure
-- **Guide:** `file 'docs/PHILOSOPHY.md'` for build philosophy
+- **Scripts:** `N5/scripts/init_build.py` creates the build folder structure
+- **Templates:** `templates/build/` for plan and status templates
+- **Guide:** `docs/BUILD_PLANNING.md` for full build planning system
+- **Routing:** See persona routing contract in `N5/prefs/system/`
 
 
 
