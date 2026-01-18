@@ -140,7 +140,7 @@ Brief description of folder role and contents.
 
 ## Anchors
 - [Root Policy](../N5/prefs/prefs.md)
-- [Related Schema](../schemas/xyz.schema.json)
+- [Related Schema](../N5/schemas/index.schema.json)
 ```
 
 ### Required Sections

@@ -222,10 +222,9 @@ You don't need to memorize every pattern. Start with these fundamentals:
 
 ## See Also
 
-- [docs/PERSONAS.md](docs/PERSONAS.md) — Specialist personas in N5OS
-- [docs/RULES.md](docs/RULES.md) — Behavioral rules system
-- [docs/ROUTING.md](docs/ROUTING.md) — Persona choreography patterns
-- [N5/prefs/system/nuance-manifest.md](../N5/prefs/system/nuance-manifest.md) — Full canonical reference
+- [PERSONAS.md](PERSONAS.md) — Specialist personas in N5OS
+- [RULES.md](RULES.md) — Behavioral rules system
+- [ROUTING.md](ROUTING.md) — Persona choreography patterns
 
 ---
 
