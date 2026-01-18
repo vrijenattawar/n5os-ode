@@ -117,12 +117,28 @@ def determine_group_from_intent(intent: str, groups: Dict) -> str:
 
 def main():
     parser = argparse.ArgumentParser(description="N5 Dynamic Context Loader")
-    parser.add_argument("input", help="Mode name (e.g., 'build') or Intent string (e.g., 'fix the script')")
+    parser.add_argument("input", nargs='?', help="Mode name (e.g., 'build') or Intent string (e.g., 'fix the script'). Use --list to see available modes.")
+    parser.add_argument("--list", action="store_true", help="List all available context groups")
     args = parser.parse_args()
 
     manifest = load_manifest()
     groups = manifest.get("groups", {})
     
+    # Handle --list option
+    if args.list:
+        print("\n=== Available Context Groups ===\n")
+        for name, config in groups.items():
+            desc = config.get("description", "No description")
+            file_count = len(config.get("files", []))
+            print(f"  {name:15} - {desc} ({file_count} files)")
+        print()
+        return
+    
+    # Ensure input is provided for normal operation
+    if not args.input:
+        parser.print_help()
+        sys.exit(1)
+
     target_group = None
     is_fallback = False
     
