@@ -1,7 +1,7 @@
 ---
 created: 2026-01-15
-last_edited: 2026-01-15
-version: 1.0
+last_edited: 2026-01-18
+version: 1.1
 provenance: worker_006_documentation
 ---
 
@@ -177,6 +177,18 @@ Dynamic context injection by task category:
 
 → See [docs/CONTEXT_LOADING.md](docs/CONTEXT_LOADING.md) for details
 
+### Safety System
+
+Comprehensive protection layer preventing catastrophic file operations:
+
+- **.n5protected markers** — Directory-level protection against moves/deletes
+- **Folder-specific POLICY.md** — Override global preferences at folder level
+- **Protected paths and file types** — Auto-review for databases, secrets, system files
+- **PII tracking** — Mark directories containing personally identifiable information
+- **Blast radius control** — Logged, reversible operations with audit trails
+
+→ See [docs/SAFETY.md](docs/SAFETY.md) for protection mechanisms and usage
+
 ### Sites Protocol
 
 Structured deployment workflow for web applications:
@@ -252,6 +264,7 @@ N5OS Ode is built on these beliefs:
 | [SEMANTIC_MEMORY.md](docs/SEMANTIC_MEMORY.md) | Optional memory layer setup |
 | [CONVERSATION_END.md](docs/CONVERSATION_END.md) | Tiered conversation close |
 | [CONTEXT_LOADING.md](docs/CONTEXT_LOADING.md) | Dynamic context injection |
+| [SAFETY.md](docs/SAFETY.md) | Protection mechanisms and usage |
 | [SITES.md](docs/SITES.md) | Sites protocol, staging/prod patterns, service conventions |
 
 ---
@@ -292,7 +305,7 @@ We gratefully acknowledge their contribution to the Zo ecosystem.
 
 ## Version
 
-**N5OS Ode v1.0**  
+**N5OS Ode v1.1**  
 Released: January 2026
 
 ---

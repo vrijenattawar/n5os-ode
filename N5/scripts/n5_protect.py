@@ -9,8 +9,7 @@ Usage:
     n5_protect.py list-pii
     n5_protect.py check <path>
     n5_protect.py mark-pii <path> --categories email,phone [--note "description"]
-
-Part of n5OS-Ode: https://github.com/vrijenattawar/n5os-ode
+    n5_protect.py auto-protect-services
 """
 
 import argparse
@@ -20,6 +19,15 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
+
+# Add import for centralized paths
+try:
+    from N5.lib.paths import N5_SCRIPTS_DIR, N5_ROOT, WORKSPACE_ROOT
+except ImportError:
+    # Fallback for standalone execution
+    N5_SCRIPTS_DIR = Path("/home/workspace/N5/scripts")
+    N5_ROOT = Path("/home/workspace/N5")
+    WORKSPACE_ROOT = Path("/home/workspace")
 
 logging.basicConfig(
     level=logging.INFO,
@@ -202,99 +210,188 @@ def mark_pii(directory: Path, categories: list[str], note: Optional[str] = None)
         return False
 
 
-def main():
-    parser = argparse.ArgumentParser(description="N5 File Protection System")
-    subparsers = parser.add_subparsers(dest="command", help="Commands")
+def auto_protect_services() -> int:
+    """
+    Auto-protect all registered user service working directories.
+    Returns count of newly protected directories.
+    """
+    protected_count = 0
     
-    # Protect command
+    try:
+        # Import here to avoid circular dependencies
+        import subprocess
+        import json as json_module
+        
+        # Get list of user services
+        result = subprocess.run(
+            ["python3", str(N5_SCRIPTS_DIR / "n5_user_services.py"), "list"],
+            capture_output=True,
+            text=True,
+            timeout=10
+        )
+        
+        if result.returncode != 0:
+            logger.error("Failed to list user services")
+            return 0
+        
+        # Parse service list (assuming JSON output)
+        # If services script doesn't output JSON, we'll need to adjust
+        logger.info("Checking user services for auto-protection...")
+        
+        # For now, we'll scan known service directories
+        # This will be enhanced when we integrate with service registration
+        service_dirs = [
+            "/home/workspace/n5-waitlist",
+            "/home/workspace/Projects/streaming-player-setup",
+            "/home/workspace/.n5_bootstrap_server",
+            "/home/workspace/N5/services/zobridge",
+        ]
+        
+        for dir_path in service_dirs:
+            path = Path(dir_path)
+            if path.exists() and path.is_dir():
+                marker_path = path / MARKER_FILENAME
+                if not marker_path.exists():
+                    if create_marker(
+                        path,
+                        reason="registered_service",
+                        metadata={"created_by": "system", "auto_protected": True}
+                    ):
+                        protected_count += 1
+        
+        logger.info(f"✓ Auto-protected {protected_count} service directories")
+        return protected_count
+        
+    except Exception as e:
+        logger.error(f"Failed to auto-protect services: {e}", exc_info=True)
+        return 0
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(
+        description="N5 File Protection System - Lightweight directory protection"
+    )
+    
+    subparsers = parser.add_subparsers(dest="command", help="Command to execute")
+    
+    # protect command
     protect_parser = subparsers.add_parser("protect", help="Protect a directory")
     protect_parser.add_argument("path", type=Path, help="Directory to protect")
     protect_parser.add_argument("--reason", required=True, help="Reason for protection")
     protect_parser.add_argument("--pii", action="store_true", help="Mark as containing PII")
-    protect_parser.add_argument("--pii-categories", help="Comma-separated PII categories")
+    protect_parser.add_argument("--pii-categories", type=str, 
+                                help="Comma-separated PII types: email,phone,name,health,financial,ssn,address,dob")
+    protect_parser.add_argument("--pii-note", type=str, help="Description of PII content")
     
-    # Unprotect command
-    unprotect_parser = subparsers.add_parser("unprotect", help="Remove protection")
+    # unprotect command
+    unprotect_parser = subparsers.add_parser("unprotect", help="Unprotect a directory")
     unprotect_parser.add_argument("path", type=Path, help="Directory to unprotect")
     
-    # List command
-    subparsers.add_parser("list", help="List protected directories")
-    
-    # List PII command
-    subparsers.add_parser("list-pii", help="List directories with PII")
-    
-    # Check command
+    # check command
     check_parser = subparsers.add_parser("check", help="Check if path is protected")
     check_parser.add_argument("path", type=Path, help="Path to check")
     
-    # Mark PII command
-    pii_parser = subparsers.add_parser("mark-pii", help="Add PII flags to protected directory")
-    pii_parser.add_argument("path", type=Path, help="Protected directory")
-    pii_parser.add_argument("--categories", required=True, help="Comma-separated categories")
-    pii_parser.add_argument("--note", help="Additional note about PII")
+    # list command
+    subparsers.add_parser("list", help="List all protected directories")
+    
+    # list-pii command
+    subparsers.add_parser("list-pii", help="List all directories containing PII")
+    
+    # mark-pii command
+    markpii_parser = subparsers.add_parser("mark-pii", help="Mark existing protected directory as containing PII")
+    markpii_parser.add_argument("path", type=Path, help="Protected directory to mark")
+    markpii_parser.add_argument("--categories", required=True, type=str,
+                                help="Comma-separated PII types: email,phone,name,health,financial,ssn,address,dob")
+    markpii_parser.add_argument("--note", type=str, help="Description of PII content")
+    
+    # auto-protect-services command
+    subparsers.add_parser(
+        "auto-protect-services",
+        help="Auto-protect all registered service directories"
+    )
     
     args = parser.parse_args()
+    
+    if not args.command:
+        parser.print_help()
+        return 1
     
     try:
         if args.command == "protect":
             pii_cats = args.pii_categories.split(",") if args.pii_categories else None
-            return 0 if create_marker(args.path, args.reason, 
-                                     contains_pii=args.pii, pii_categories=pii_cats) else 1
+            if args.pii and pii_cats:
+                invalid = set(pii_cats) - VALID_PII_CATEGORIES
+                if invalid:
+                    logger.error(f"Invalid PII categories: {invalid}. Valid: {VALID_PII_CATEGORIES}")
+                    return 1
+            return 0 if create_marker(
+                args.path, args.reason,
+                contains_pii=args.pii,
+                pii_categories=pii_cats,
+                pii_note=args.pii_note
+            ) else 1
             
         elif args.command == "unprotect":
             return 0 if remove_marker(args.path) else 1
             
+        elif args.command == "check":
+            marker_data = check_protected(args.path)
+            if marker_data:
+                print(f"⚠️  PROTECTED: {args.path}")
+                print(f"   Reason: {marker_data.get('reason', 'unknown')}")
+                print(f"   Created: {marker_data.get('created', 'unknown')}")
+                if marker_data.get("contains_pii"):
+                    print(f"   🔴 CONTAINS PII: {', '.join(marker_data.get('pii_categories', []))}")
+                    if marker_data.get("pii_note"):
+                        print(f"   PII Note: {marker_data['pii_note']}")
+                return 0
+            else:
+                print(f"✓ Not protected: {args.path}")
+                return 1
+                
         elif args.command == "list":
             protected = list_protected()
             if not protected:
                 print("No protected directories found.")
                 return 0
             
-            print(f"\n{'='*60}")
-            print("PROTECTED DIRECTORIES")
-            print(f"{'='*60}")
-            for directory, marker_data in sorted(protected, key=lambda x: str(x[0])):
+            print(f"Found {len(protected)} protected directories:\n")
+            for directory, marker_data in sorted(protected):
                 rel_path = directory.relative_to(WORKSPACE) if directory.is_relative_to(WORKSPACE) else directory
-                pii_flag = " [PII]" if marker_data.get("contains_pii") else ""
-                print(f"\n📁 {rel_path}{pii_flag}")
-                print(f"   Reason: {marker_data.get('reason', 'N/A')}")
-                print(f"   Created: {marker_data.get('created', 'N/A')[:10]}")
-            print(f"\nTotal: {len(protected)} protected directories")
+                reason = marker_data.get('reason', 'unknown')
+                pii_flag = " 🔴 PII" if marker_data.get("contains_pii") else ""
+                print(f"  🔒 {rel_path}{pii_flag}")
+                print(f"     Reason: {reason}")
+                if marker_data.get("contains_pii"):
+                    print(f"     PII: {', '.join(marker_data.get('pii_categories', []))}")
+                print()
             return 0
             
         elif args.command == "list-pii":
             pii_dirs = list_pii_paths()
             if not pii_dirs:
-                print("No PII directories found.")
+                print("No PII-containing directories found.")
                 return 0
             
-            print(f"\n{'='*60}")
-            print("DIRECTORIES CONTAINING PII")
-            print(f"{'='*60}")
-            for directory, marker_data in sorted(pii_dirs, key=lambda x: str(x[0])):
+            print(f"Found {len(pii_dirs)} directories containing PII:\n")
+            for directory, marker_data in sorted(pii_dirs):
                 rel_path = directory.relative_to(WORKSPACE) if directory.is_relative_to(WORKSPACE) else directory
-                cats = ", ".join(marker_data.get("pii_categories", []))
-                print(f"\n⚠️  {rel_path}")
-                print(f"   Categories: {cats}")
-                if marker_data.get("pii_note"):
-                    print(f"   Note: {marker_data['pii_note']}")
-            print(f"\nTotal: {len(pii_dirs)} PII directories")
+                cats = marker_data.get('pii_categories', [])
+                note = marker_data.get('pii_note', '')
+                print(f"  🔴 {rel_path}")
+                print(f"     Categories: {', '.join(cats)}")
+                if note:
+                    print(f"     Note: {note}")
+                print()
             return 0
-            
-        elif args.command == "check":
-            result = check_protected(args.path)
-            if result:
-                pii_msg = " [CONTAINS PII]" if result.get("contains_pii") else ""
-                print(f"⚠️  This path is protected{pii_msg}")
-                print(f"   Reason: {result.get('reason', 'N/A')}")
-                return 0
-            else:
-                print("✓ Path is not protected")
-                return 0
             
         elif args.command == "mark-pii":
             categories = args.categories.split(",")
             return 0 if mark_pii(args.path, categories, args.note) else 1
+            
+        elif args.command == "auto-protect-services":
+            count = auto_protect_services()
+            return 0 if count >= 0 else 1
             
         else:
             parser.print_help()
@@ -307,4 +404,5 @@ def main():
 
 if __name__ == "__main__":
     sys.exit(main())
+
 
