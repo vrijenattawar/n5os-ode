@@ -12,6 +12,10 @@ Features:
 - Recency-weighted retrieval
 
 Packaged for n5OS Ode distribution.
+
+Attribution:
+    The semantic memory architecture is based on foundational work by The Fork Project.
+    See: https://github.com/theforkproject-dev/zo-local-memory
 """
 
 import sqlite3

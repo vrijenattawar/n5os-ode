@@ -1,5 +1,7 @@
 # Semantic Memory System
 
+> **Attribution**: The semantic memory architecture in N5OS Ode is based on foundational work by **[The Fork Project](https://github.com/theforkproject-dev)**. Their [zo-local-memory](https://github.com/theforkproject-dev/zo-local-memory) project established the core patterns for local semantic memory on Zo Computer. We gratefully acknowledge their contribution.
+
 The N5 Semantic Memory system provides AI-native retrieval over your workspace. It transforms documents into searchable vector embeddings, enabling semantic search that understands meaning rather than just keywords.
 
 ## Overview

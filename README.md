@@ -225,6 +225,14 @@ Re-run @BOOTLOADER — it's idempotent (safe to run multiple times)
 
 ---
 
+## Acknowledgments
+
+The semantic memory architecture in N5OS Ode is based on foundational work by **[The Fork Project](https://github.com/theforkproject-dev)**. Their [zo-local-memory](https://github.com/theforkproject-dev/zo-local-memory) project established the core patterns for local semantic memory on Zo Computer, including the embedding pipeline, vector storage structure, and retrieval approach.
+
+We gratefully acknowledge their contribution to the Zo ecosystem.
+
+---
+
 ## Version
 
 **N5OS Ode v1.0**  
