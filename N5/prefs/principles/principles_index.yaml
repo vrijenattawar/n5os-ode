@@ -1,0 +1,144 @@
+---
+# Principles Library Index
+# A curated collection of architectural wisdom for N5OS Ode
+
+principles:
+  P01:
+    id: P1
+    name: Human-Readable First
+    category: code_patterns
+    priority: high
+    description: Generate human-readable content first (markdown/text), then derive machine formats from it
+
+  P02:
+    id: P2
+    name: Single Source of Truth (SSOT)
+    category: quality
+    priority: high
+    description: Maintain exactly one canonical location for each piece of information
+
+  P05:
+    id: P5
+    name: Safety, Determinism, and Anti-Overwrite
+    category: quality
+    priority: high
+    description: Prevent data loss through auto-versioning and explicit confirmation
+
+  P07:
+    id: P7
+    name: Idempotence and Dry-Run by Default
+    category: code_patterns
+    priority: high
+    description: Support dry-run mode and ensure safe re-running of workflows
+
+  P08:
+    id: P8
+    name: Minimal Context, Maximal Clarity
+    category: communication
+    priority: high
+    description: Load only what's needed; keep prompts self-contained
+
+  P11:
+    id: P11
+    name: Failure Modes and Recovery
+    category: quality
+    priority: high
+    description: Handle failures gracefully with pauses on uncertainty and incident logging
+
+  P13:
+    id: P13
+    name: Naming and Placement
+    category: code_patterns
+    priority: medium
+    description: Use consistent naming conventions and established file placement patterns
+
+  P15:
+    id: P15
+    name: Complete Before Claiming Complete
+    category: quality
+    priority: critical
+    description: Report accurate progress with quantitative metrics; never claim done prematurely
+
+  P16:
+    id: P16
+    name: Accuracy Over Sophistication
+    category: quality
+    priority: high
+    description: Provide accurate, conservative facts rather than sophisticated speculation
+
+  P18:
+    id: P18
+    name: State Verification is Mandatory
+    category: quality
+    priority: high
+    description: Verify operations succeeded explicitly; never assume success
+
+  P19:
+    id: P19
+    name: Error Handling is Not Optional
+    category: safety
+    priority: critical
+    description: Every system must have explicit error handling and recovery paths
+
+  P20:
+    id: P20
+    name: Modular Design for Context Efficiency
+    category: design
+    priority: high
+    description: Break monolithic content into focused, independently useful modules
+
+  P21:
+    id: P21
+    name: Document All Assumptions, Placeholders, and Stubs
+    category: quality
+    priority: high
+    description: Make incomplete implementations explicit and trackable
+
+  P23:
+    id: P23
+    name: Identify Trap Doors
+    category: strategy
+    priority: critical
+    description: Explicitly identify and document irreversible decisions before committing
+
+  P27:
+    id: P27
+    name: Nemawashi Mode
+    category: strategy
+    priority: high
+    description: Explore 2-3 alternatives before committing to any approach
+
+  P28:
+    id: P28
+    name: Plans As Code DNA
+    category: strategy
+    priority: critical
+    description: Code quality comes from planning, not implementation; write clear specifications
+
+  P32:
+    id: P32
+    name: Simple Over Easy
+    category: design
+    priority: critical
+    description: Choose simple (few concepts) over easy (familiar but complex)
+
+  P36:
+    id: P36
+    name: Orchestration Pattern
+    category: workflow
+    priority: high
+    description: Multi-persona workflow for complex projects spanning multiple domains
+
+meta:
+  total_principles: 18
+  critical_priority: 4
+  high_priority: 13
+  medium_priority: 1
+  categories:
+    code_patterns: 3
+    quality: 7
+    communication: 1
+    safety: 1
+    design: 3
+    strategy: 3
+    workflow: 1
