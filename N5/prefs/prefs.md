@@ -88,7 +88,7 @@ To customize n5OS-Ode for your workflow:
 
 ## Further Reading
 
-- [n5OS-Ode README](../../README.md) - Project overview
-- [Architecture](../docs/ARCHITECTURE.md) - System design
-- [Contributing](../docs/CONTRIBUTING.md) - How to contribute
+- [n5OS-Ode README](../../README.md) — Project overview
+- [Architecture](../../docs/ARCHITECTURE.md) — System design
+- [Contributing](../../docs/CONTRIBUTING.md) — How to contribute
 

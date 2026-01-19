@@ -16,7 +16,8 @@ def main():
     parser.add_argument("--verbose", action="store_true", help="Verbose output")
     args = parser.parse_args()
     
-    root = Path(__file__).parent.parent
+    # Script is at N5/scripts/, repo root is 2 levels up
+    root = Path(__file__).resolve().parent.parent.parent
     errors = []
     warnings = []
     
@@ -30,7 +31,8 @@ def main():
     
     # 2. Check for file references in markdown/prompts
     file_ref_re = re.compile(r"`file '([^']+)'`")
-    existing = {str(p).replace('\\', '/') for p in root.rglob('*') if p.is_file()}
+    # Build set of relative paths from root
+    existing = {str(p.relative_to(root)).replace('\\', '/') for p in root.rglob('*') if p.is_file()}
     
     md_files = list(root.rglob("*.md")) + list(root.rglob("*.prompt.md"))
     for md_file in md_files:
@@ -72,15 +74,17 @@ def main():
             if rel not in existing:
                 warnings.append(f"Missing link target: {md_file.relative_to(root)}: {url}")
     
-    # 4. Check for PROJECT_REPO placeholder
-    placeholder_re = re.compile(r"PROJECT_REPO")
+    # 4. Check for PROJECT_REPO placeholder (skip self to avoid false positive)
+    placeholder_pattern = "PROJECT" + "_REPO"  # Split to avoid self-match
     for pf in root.rglob("*.py"):
+        if pf.name == "validate_repo.py":
+            continue  # Skip self
         try:
             txt = pf.read_text(errors="ignore")
         except Exception:
             continue
-        if placeholder_re.search(txt):
-            warnings.append(f"Placeholder PROJECT_REPO found in: {pf.relative_to(root)}")
+        if placeholder_pattern in txt:
+            warnings.append(f"Placeholder {placeholder_pattern} found in: {pf.relative_to(root)}")
     
     # Report
     print("=" * 70)

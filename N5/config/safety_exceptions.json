@@ -1,0 +1,5 @@
+{
+  "_comment": "Paths exempt from safety rules. Use sparingly.",
+  "exempt_paths": [],
+  "exempt_patterns": []
+}

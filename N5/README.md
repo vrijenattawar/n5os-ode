@@ -36,6 +36,6 @@ Main configuration files:
 ## For More Information
 
 - [Main README](../README.md) — Project overview
-- [Architecture](docs/ARCHITECTURE.md) — System design
-- [Contributing](docs/CONTRIBUTING.md) — How to contribute
+- [Architecture](../docs/ARCHITECTURE.md) — System design
+- [Contributing](../docs/CONTRIBUTING.md) — How to contribute
 

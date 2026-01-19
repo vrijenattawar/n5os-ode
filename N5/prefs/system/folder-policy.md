@@ -80,8 +80,8 @@ Brief description of folder role and contents.
 - Exempts: [Still-applicable rules]
 
 ## Anchors
-- [Root Policy](../N5/prefs/prefs.md)
-- [Related Schema](../schemas/xyz.schema.json)
+- [Root Policy](../prefs.md)
+- Related schemas in `N5/schemas/` as needed
 - Related Problems: [Issues this addresses]
 ```
 

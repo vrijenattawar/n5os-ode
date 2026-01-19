@@ -22,8 +22,10 @@ except ImportError:
     MEMORY_AVAILABLE = False
 
 
-# Base paths
-WORKSPACE = Path("/home/workspace")
+# Base paths - resolve relative to script location for portability
+# When installed: ROOT is /home/workspace, when in repo: ROOT is repo root
+ROOT = Path(__file__).resolve().parents[2]
+WORKSPACE = Path(os.environ.get("N5_WORKSPACE", ROOT))
 MANIFEST_PATH = WORKSPACE / "N5/prefs/context_manifest.yaml"
 
 def load_manifest() -> Dict:
