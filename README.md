@@ -28,9 +28,21 @@ Think of N5OS Ode as firmware for your AI. Out of the box, Zo is a powerful but 
 
 ## Quick Start
 
-### 1. Run the Bootloader
+### 1. Clone and Install
 
-Open a new Zo conversation and invoke:
+```bash
+# Clone the repo
+git clone https://github.com/vrijenattawar/n5os-ode.git
+
+# Run the installer (moves contents to workspace root)
+cd n5os-ode && bash install.sh
+```
+
+The installer moves N5OS files to your workspace root and cleans up the repo folder.
+
+### 2. Run the Bootloader
+
+Open a new Zo conversation and type:
 
 ```
 @BOOTLOADER.prompt.md
@@ -44,7 +56,7 @@ The bootloader will:
 
 Takes about 2-3 minutes.
 
-### 2. Personalize
+### 3. Personalize
 
 After installation, run:
 
@@ -59,7 +71,7 @@ This wizard collects:
 
 Your AI will adapt its behavior to match.
 
-### 3. Start Using
+### 4. Start Using
 
 You're ready. Some things to try:
 
