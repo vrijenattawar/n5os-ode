@@ -15,8 +15,10 @@ This prompt installs N5OS Ode into your Zo workspace. It will:
 2. **Install 6 core rules** for consistent behavior
 3. **Build the folder structure** for organized knowledge and workflows
 4. **Initialize core configuration files**
-5. **Set up Semantic Memory** for AI-powered search across your workspace
-6. **Validate the installation**
+5. **Initialize Conversation Registry** for tracking all conversations, artifacts, and learnings
+6. **Set up Semantic Memory** for AI-powered search across your workspace
+7. **Set up Git/GitHub** for version control (optional)
+8. **Validate the installation**
 
 > **Safe to run multiple times.** The bootloader checks for existing installations and only creates what's missing.
 
@@ -510,23 +512,84 @@ Create `.n5protected` marker files in:
 
 ---
 
-## Phase 5: Set Up Semantic Memory
+## Phase 5: Initialize Conversation Registry
+
+The Conversation Registry (`conversations.db`) tracks all your conversations, their state, artifacts created, issues encountered, and learnings extracted. This enables powerful queries and analytics over your work history.
+
+### 5.1 Create the data directory
+
+```bash
+mkdir -p N5/data
+```
+
+### 5.2 Initialize the database
+
+Run the conversation sync script with the `init` command:
+
+```bash
+python3 N5/scripts/conversation_sync.py init
+```
+
+This creates `N5/data/conversations.db` with the following tables:
+- **conversations** — Core metadata for each conversation (type, status, focus, objective, progress)
+- **artifacts** — Files created during conversations
+- **issues** — Problems encountered and their resolutions
+- **learnings** — Lessons extracted for future reference
+- **decisions** — Key decisions made with rationale
+
+### 5.3 Verify the database
+
+```bash
+# Check if database file exists
+ls -lh N5/data/conversations.db
+
+# Verify tables were created
+sqlite3 N5/data/conversations.db "SELECT name FROM sqlite_master WHERE type='table';"
+```
+
+Expected output:
+```
+conversations
+artifacts
+issues
+learnings
+decisions
+```
+
+### How it works
+
+1. **SESSION_STATE.md** — Each conversation creates a `SESSION_STATE.md` file in its workspace
+2. **Automatic sync** — The `session_state_manager.py` script syncs state to `conversations.db`
+3. **Query anywhere** — Use `conversation_sync.py query` to find conversations by type, status, etc.
+
+Example queries:
+```bash
+# Find all active build conversations
+python3 N5/scripts/conversation_sync.py query --type build --status active
+
+# Sync all existing conversations to the database
+python3 N5/scripts/conversation_sync.py sync-all
+```
+
+---
+
+## Phase 6: Set Up Semantic Memory
 
 Semantic Memory gives your AI the ability to search your workspace by meaning, not just keywords. This is optional but highly recommended.
 
-### 5.1 Create the cognition directory
+### 6.1 Create the cognition directory
 
 ```bash
 mkdir -p N5/cognition
 ```
 
-### 5.2 Install Python dependencies
+### 6.2 Install Python dependencies
 
 ```bash
 pip install numpy openai sentence-transformers
 ```
 
-### 5.3 Initialize the database
+### 6.3 Initialize the database
 
 Create `N5/cognition/brain.db` by running:
 
@@ -587,7 +650,7 @@ print('✓ Semantic memory database initialized at N5/cognition/brain.db')
 "
 ```
 
-### 5.4 Configure embedding provider (Optional)
+### 6.4 Configure embedding provider (Optional)
 
 For best quality semantic search, set up OpenAI embeddings:
 
@@ -596,7 +659,7 @@ For best quality semantic search, set up OpenAI embeddings:
 
 Without this, the system uses local embeddings (sentence-transformers) which work offline but are slightly less accurate.
 
-### 5.5 Test semantic memory
+### 6.5 Test semantic memory
 
 Verify the database was created:
 
@@ -612,9 +675,9 @@ If both commands succeed, semantic memory is ready. Full semantic search functio
 
 ---
 
-## Phase 6: Validate Installation
+## Phase 7: Validate Installation
 
-After completing phases 1-6, verify:
+After completing phases 1-7, verify:
 
 1. **Personas exist**: List personas and confirm all 6 Ode personas are present
 2. **Rules exist**: List rules and confirm all 6 core rules are present
@@ -643,7 +706,7 @@ ls -la N5/cognition/brain.db
 ---
 
 ## Post-Installation
-## Phase 7: Git/GitHub Initialization (Optional but Recommended)
+## Phase 8: Git/GitHub Initialization (Optional but Recommended)
 
 This phase sets up version control for your N5OS workspace. Git integration is optional but strongly recommended for:
 
@@ -652,7 +715,7 @@ This phase sets up version control for your N5OS workspace. Git integration is o
 - **Collaboration**: Share your N5OS configuration or work with others
 - **Migration**: Easy to move your workspace between machines
 
-### 7.1 Check if Git is Already Initialized
+### 8.1 Check if Git is Already Initialized
 
 ```bash
 # Check if .git directory exists
@@ -665,7 +728,7 @@ else
 fi
 ```
 
-### 7.2 Initialize Git Repository
+### 8.2 Initialize Git Repository
 
 Only run this if `GIT_INITIALIZED=false`:
 
@@ -684,7 +747,7 @@ fi
 echo "✓ Git repository initialized"
 ```
 
-### 7.3 Create/Update .gitignore
+### 8.3 Create/Update .gitignore
 
 Create a `.gitignore` file in the workspace root with sensible defaults:
 
@@ -761,11 +824,11 @@ EOF
 echo "✓ .gitignore created/updated"
 ```
 
-### 7.4 Optional: Configure GitHub Remote
+### 8.4 Optional: Configure GitHub Remote
 
 Ask the user if they want to set up GitHub integration. This is optional.
 
-#### 7.4.1 Check for GitHub CLI Availability
+#### 8.4.1 Check for GitHub CLI Availability
 
 ```bash
 if command -v gh &> /dev/null; then
@@ -777,7 +840,7 @@ else
 fi
 ```
 
-#### 7.4.2 Prompt User for GitHub Setup
+#### 8.4.2 Prompt User for GitHub Setup
 
 Ask the user:
 
@@ -793,7 +856,7 @@ Please provide:
 - Public or private (default: private)
 ```
 
-#### 7.4.3 Create GitHub Repository (If gh CLI Available)
+#### 8.4.3 Create GitHub Repository (If gh CLI Available)
 
 If user provides GitHub username and `GH_AVAILABLE=true`:
 
@@ -812,7 +875,7 @@ echo "✓ GitHub repository created and initial commit pushed"
 echo "🔗 Repository URL: https://github.com/$GITHUB_USERNAME/$REPO_NAME"
 ```
 
-#### 7.4.4 Manual GitHub Setup (If gh CLI Not Available)
+#### 8.4.4 Manual GitHub Setup (If gh CLI Not Available)
 
 If `GH_AVAILABLE=false` but user wants GitHub:
 
@@ -830,7 +893,7 @@ To set up GitHub manually:
    git push -u origin main
 ```
 
-### 7.5 Make Initial Commit
+### 8.5 Make Initial Commit
 
 Whether or not GitHub is configured, create an initial commit:
 
@@ -856,7 +919,7 @@ git branch -M main
 echo "✓ Initial commit created"
 ```
 
-### 7.6 Push to GitHub (If Remote Configured)
+### 8.6 Push to GitHub (If Remote Configured)
 
 If GitHub remote was set up:
 
@@ -867,7 +930,7 @@ git push -u origin main
 echo "✓ Changes pushed to GitHub"
 ```
 
-### 7.7 Git Validation Checklist
+### 8.7 Git Validation Checklist
 
 After completing git setup, verify:
 
@@ -904,7 +967,7 @@ cat .gitignore
 
 **"gh: command not found"**
 - Install GitHub CLI: https://cli.github.com/
-- Or use manual GitHub setup (see section 7.4.4)
+- Or use manual GitHub setup (see section 8.4.4)
 
 **"Permission denied (publickey)"**
 - Set up SSH keys for GitHub: https://docs.github.com/authentication/connecting-to-github-with-ssh
