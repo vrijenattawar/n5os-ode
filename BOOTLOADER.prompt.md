@@ -444,7 +444,40 @@ mkdir -p Prompts/reflections
 
 ## Phase 4: Initialize Core Files
 
+> **⚠️ PERSONALIZATION SAFEGUARD**: Before creating any config files, CHECK if they already exist and contain user data. Preserve existing personalization!
+
+### 4.0 Check for Existing Personalization
+
+Before proceeding with file creation, run this check:
+
+```bash
+# Check if prefs.md exists and is personalized
+if [ -f "N5/prefs/prefs.md" ]; then
+    # Check if it contains actual user data (not just placeholders)
+    if grep -q "\[TO BE SET\]" "N5/prefs/prefs.md"; then
+        echo "📝 prefs.md exists but is not personalized yet"
+        PREFS_STATUS="placeholder"
+    else
+        echo "✅ prefs.md exists and IS personalized - PRESERVING"
+        PREFS_STATUS="personalized"
+    fi
+else
+    echo "📄 prefs.md does not exist - will create"
+    PREFS_STATUS="missing"
+fi
+```
+
+**Decision logic for Zo:**
+- If `PREFS_STATUS="personalized"`: **SKIP creating prefs.md** — user data must be preserved
+- If `PREFS_STATUS="placeholder"`: Safe to overwrite (no user data to lose)
+- If `PREFS_STATUS="missing"`: Create the file
+
+**If personalized prefs.md exists**, inform the user:
+> "I found your existing preferences at `N5/prefs/prefs.md` with your personalized settings. I'm preserving these. If you want to update them, run `@PERSONALIZE.prompt.md` after installation."
+
 ### 4.1 Create N5/prefs/prefs.md
+
+**Only create this file if PREFS_STATUS is "missing" or "placeholder".**
 
 ```markdown
 ---
