@@ -1,88 +1,72 @@
 #!/bin/bash
 # N5OS Ode Installer
-# Moves repo contents to workspace root and cleans up
+# Moves repo contents to workspace root, merging with existing folders
 
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-WORKSPACE_ROOT="/home/workspace"
+WORKSPACE="/home/workspace"
 
-echo "🚀 N5OS Ode Installer"
-echo "====================="
-echo ""
-
-# Check if we're inside the cloned repo
+# Must be run from inside the n5os-ode directory
 if [[ ! -f "$SCRIPT_DIR/BOOTLOADER.prompt.md" ]]; then
-    echo "❌ Error: Run this script from inside the n5os-ode directory"
+    echo "❌ Error: Run this from inside the n5os-ode directory"
+    echo "   cd n5os-ode && bash install.sh"
     exit 1
 fi
 
-# Check if already at workspace root
-if [[ "$SCRIPT_DIR" == "$WORKSPACE_ROOT" ]]; then
-    echo "✅ Already at workspace root. Nothing to move."
-    echo "   Run: @BOOTLOADER.prompt.md to complete setup"
-    exit 0
-fi
-
-echo "📂 Moving N5OS Ode contents to workspace root..."
-echo "   From: $SCRIPT_DIR"
-echo "   To:   $WORKSPACE_ROOT"
+echo "📦 Installing N5OS Ode to $WORKSPACE"
 echo ""
 
-# List of directories/files to move
-ITEMS=(
-    "N5"
-    "Knowledge"
-    "Lists"
-    "Prompts"
-    "Records"
-    "templates"
-    "docs"
-    "scripts"
-    "BOOTLOADER.prompt.md"
-    "PERSONALIZE.prompt.md"
-    "CHANGELOG.md"
-    "README.md"
-)
-
-# Move each item, merging if directory exists
-for item in "${ITEMS[@]}"; do
-    src="$SCRIPT_DIR/$item"
-    dst="$WORKSPACE_ROOT/$item"
+# Function to merge directory contents (not replace)
+merge_dir() {
+    local src="$1"
+    local dst="$2"
     
-    if [[ ! -e "$src" ]]; then
-        continue
+    if [[ ! -d "$src" ]]; then
+        return
     fi
     
-    if [[ -d "$src" ]]; then
-        if [[ -d "$dst" ]]; then
-            echo "   📁 Merging $item/ (directory exists)"
-            cp -rn "$src"/* "$dst"/ 2>/dev/null || cp -r "$src"/* "$dst"/
+    mkdir -p "$dst"
+    
+    # Copy contents, not the directory itself
+    # -n = no clobber (don't overwrite existing files)
+    cp -rn "$src"/* "$dst"/ 2>/dev/null || true
+    echo "  ✓ Merged $src → $dst"
+}
+
+# Directories to merge (these might already exist)
+echo "Merging directories..."
+merge_dir "$SCRIPT_DIR/N5" "$WORKSPACE/N5"
+merge_dir "$SCRIPT_DIR/Prompts" "$WORKSPACE/Prompts"
+merge_dir "$SCRIPT_DIR/Knowledge" "$WORKSPACE/Knowledge"
+merge_dir "$SCRIPT_DIR/Records" "$WORKSPACE/Records"
+merge_dir "$SCRIPT_DIR/Lists" "$WORKSPACE/Lists"
+merge_dir "$SCRIPT_DIR/docs" "$WORKSPACE/docs"
+merge_dir "$SCRIPT_DIR/templates" "$WORKSPACE/templates"
+
+# Copy root-level files (don't overwrite if they exist)
+echo ""
+echo "Copying root files..."
+for f in BOOTLOADER.prompt.md PERSONALIZE.prompt.md PLAN.prompt.md README.md CHANGELOG.md LICENSE .gitignore; do
+    if [[ -f "$SCRIPT_DIR/$f" ]]; then
+        if [[ ! -f "$WORKSPACE/$f" ]]; then
+            cp "$SCRIPT_DIR/$f" "$WORKSPACE/$f"
+            echo "  ✓ Copied $f"
         else
-            echo "   📁 Moving $item/"
-            mv "$src" "$dst"
-        fi
-    else
-        if [[ -f "$dst" ]]; then
-            echo "   📄 Skipping $item (already exists)"
-        else
-            echo "   📄 Moving $item"
-            mv "$src" "$dst"
+            echo "  ⏭ Skipped $f (already exists)"
         fi
     fi
 done
 
-# Clean up the now-empty repo directory
-REPO_NAME="$(basename "$SCRIPT_DIR")"
+# Clean up the cloned directory
 echo ""
-echo "🧹 Cleaning up $REPO_NAME/ directory..."
-
-# Remove remaining files (LICENSE, .git, etc)
-cd "$WORKSPACE_ROOT"
+echo "Cleaning up..."
+cd "$WORKSPACE"
 rm -rf "$SCRIPT_DIR"
+echo "  ✓ Removed n5os-ode/ directory"
 
 echo ""
-echo "✅ Installation complete!"
+echo "✅ N5OS Ode installed!"
 echo ""
 echo "Next steps:"
 echo "  1. Open a new Zo conversation"
