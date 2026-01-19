@@ -1,0 +1,154 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://n5.local/schemas/build-meta-v1.json",
+  "title": "Build Meta Schema",
+  "description": "Machine-readable build state for orchestration tracking",
+  "type": "object",
+  "required": ["schema_version", "slug", "title", "created", "status", "type"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "description": "Schema version for forward compatibility",
+      "default": "1.0",
+      "const": "1.0"
+    },
+    "slug": {
+      "type": "string",
+      "description": "URL-safe build identifier (lowercase, hyphens)",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+    },
+    "title": {
+      "type": "string",
+      "description": "Human-readable build title"
+    },
+    "objective": {
+      "type": "string",
+      "description": "One-sentence build objective"
+    },
+    "created": {
+      "type": "string",
+      "format": "date",
+      "description": "ISO 8601 date when build was created"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["draft", "active", "complete", "abandoned"],
+      "description": "Current build lifecycle status"
+    },
+    "completed_at": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "ISO 8601 timestamp when build completed (null if not complete)"
+    },
+    "type": {
+      "type": "string",
+      "enum": ["code_build", "content", "research", "general"],
+      "description": "Build type for context and routing"
+    },
+    "orchestrator_convo_id": {
+      "type": ["string", "null"],
+      "description": "Conversation ID of the orchestrator thread"
+    },
+    "workers": {
+      "type": "object",
+      "description": "Aggregate worker statistics",
+      "properties": {
+        "total": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total number of workers"
+        },
+        "complete": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Workers with status complete"
+        },
+        "in_progress": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Workers currently being worked on"
+        },
+        "blocked": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Workers blocked on external issues"
+        },
+        "pending": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Workers not yet started"
+        }
+      },
+      "required": ["total", "complete", "in_progress", "blocked", "pending"]
+    },
+    "waves": {
+      "type": "array",
+      "description": "Wave definitions with worker assignments",
+      "items": {
+        "type": "object",
+        "required": ["wave", "workers", "status"],
+        "properties": {
+          "wave": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Wave number (1-indexed)"
+          },
+          "workers": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^W[0-9]+\\.[0-9]+$"
+            },
+            "description": "Worker IDs in this wave (e.g., W1.1, W1.2)"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["pending", "in_progress", "complete"],
+            "description": "Wave execution status"
+          }
+        }
+      }
+    },
+    "worker_details": {
+      "type": "array",
+      "description": "Individual worker status records",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "status"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^W[0-9]+\\.[0-9]+$",
+            "description": "Worker ID (e.g., W1.1)"
+          },
+          "title": {
+            "type": "string",
+            "description": "Worker task title"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["pending", "in_progress", "complete", "blocked", "paused"],
+            "description": "Individual worker status"
+          },
+          "thread_id": {
+            "type": ["string", "null"],
+            "description": "Conversation ID of worker thread"
+          },
+          "completed_at": {
+            "type": ["string", "null"],
+            "format": "date-time",
+            "description": "When worker completed"
+          },
+          "depends_on": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^W[0-9]+\\.[0-9]+$"
+            },
+            "description": "Worker IDs this depends on"
+          }
+        }
+      }
+    }
+  }
+}

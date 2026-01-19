@@ -79,6 +79,21 @@ status: draft
 
 ---
 
+## Worker Briefs
+
+<!-- For builds using v2 orchestrator: briefs are in `workers/` folder. -->
+<!-- Titles are pre-decided to enable easy thread management. -->
+
+| Wave | Worker | Title | Brief File |
+|------|--------|-------|------------|
+| 1 | W1.1 | {{W1.1_TITLE}} | `workers/W1.1-{{W1.1_SLUG}}.md` |
+| 1 | W1.2 | {{W1.2_TITLE}} | `workers/W1.2-{{W1.2_SLUG}}.md` |
+| 2 | W2.1 | {{W2.1_TITLE}} | `workers/W2.1-{{W2.1_SLUG}}.md` |
+
+<!-- Add rows as needed. Wave 2+ workers depend on Wave 1 completion. -->
+
+---
+
 ## Success Criteria
 
 <!-- How do we know we're done? Measurable outcomes. -->

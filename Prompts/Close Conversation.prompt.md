@@ -11,8 +11,8 @@ tags:
   - positions
 created: 2025-10-15
 last_edited: 2026-01-18
-version: 5.1
-provenance: con_VATFOKPkpp4aOjhw
+version: 5.3
+provenance: con_acsL39swzoCxrfWs
 ---
 
 # Close Conversation
@@ -38,6 +38,15 @@ Runs the formal **conversation-end workflow** with automatic mode and tier detec
 ## Step 0: Detect Mode
 
 Check SESSION_STATE.md frontmatter for build context:
+
+**V2 Build System (preferred):**
+```yaml
+worker_id: W1.1              # V2 worker identifier
+build_slug: my-project       # Build folder name
+thread_title: "[my-project] W1.1: Task Name"  # Pre-decided title
+```
+
+**Legacy format:**
 ```yaml
 build_id: my-project       # If present → Worker Close
 worker_num: 1              # Worker number
@@ -45,10 +54,11 @@ parent_topic: My Project   # For greppable tags
 ```
 
 **Detection priority:**
-1. `build_id` + `worker_num` in SESSION_STATE frontmatter → Worker Close
-2. `## Build Context` section in SESSION_STATE → Worker Close  
-3. `mode: worker` in SESSION_STATE frontmatter → Worker Close
-4. Otherwise → Full Close mode
+1. `worker_id` + `build_slug` in SESSION_STATE frontmatter → Worker Close (v2)
+2. `build_id` + `worker_num` in SESSION_STATE frontmatter → Worker Close (legacy)
+3. `## Build Context` section in SESSION_STATE → Worker Close  
+4. `mode: worker` in SESSION_STATE frontmatter → Worker Close
+5. Otherwise → Full Close mode
 
 **If Worker Close mode → Follow Worker Steps below**
 **Otherwise → Follow Full Close mode**
@@ -66,19 +76,57 @@ Check all work products exist and are in correct locations:
 - Any artifacts promised but not delivered?
 - Any loose ends or caveats?
 
-## Worker Step 2: Generate Worker Title
+## Worker Step 2: Generate Post-Close Title
 
-**Format:** `MMM DD | {State} 👷🏽‍♂️ {Content} [Parent-Topic] Task Description`
+**Two-phase title system:**
+- **Pre-decided title** (from worker brief): Used by V to rename thread immediately after opening
+- **Post-close title** (generated now): Adds 3-slot emoji prefix based on what actually happened
 
-The `[Parent-Topic]` tag creates **greppable lineage** to the orchestrator.
+**3-Slot Emoji System (from `N5/config/emoji-legend.json`):**
+- **Slot 1 (State):** ✅ complete | ❌ failed | 🚧 in_progress | ⏸️ paused
+- **Slot 2 (Type):** 👷🏽‍♂️ worker (always for workers)
+- **Slot 3 (Content):** 🏗️ build | 🛠️ repair | 🔎 research | etc. (based on work done)
+
+**Generation Process:**
+
+1. **Get base title** from SESSION_STATE frontmatter `thread_title`
+   - If missing, construct: `[{build_slug}] W{worker_id}: {task_name}`
+
+2. **Determine State emoji** from completion status:
+   - All deliverables complete, no blockers → ✅
+   - Completed with caveats or partial → 🚧
+   - Blocked, cannot proceed → ⏸️
+   - Failed with errors → ❌
+
+3. **Type emoji** is always 👷🏽‍♂️ (worker)
+
+4. **Determine Content emoji** semantically from work done:
+   - Built features/systems → 🏗️
+   - Fixed bugs/debugged → 🛠️
+   - Research/investigation → 🔎
+   - Site/web work → 🕸️
+   - Content writing → ✍️
+   - Data/analytics → 📊
+   - Organization/cleanup → 🗂️
+   - Planning/design → 📝
+
+5. **Compose final title:**
+   ```
+   {state} {type} {content} {base_title}
+   ```
 
 **Example:**
-```
-Jan 15 | ✅ 👷🏽‍♂️ 🛠️ [CRM-Consolidation] Fix Import Paths
-Jan 15 | ✅ 👷🏽‍♂️ 🏗️ [CRM-Consolidation] Build Calendar Webhook
-```
+- Pre-decided (from brief): `[build-orchestrator-v2] W3.1: Build Status Script`
+- Post-close (generated): `✅ 👷🏽‍♂️ 🏗️ [build-orchestrator-v2] W3.1: Build Status Script`
 
-The `[Parent-Topic]` comes from the orchestrator's topic slug or SESSION_STATE.
+**Output format:**
+```markdown
+## Worker Close Complete
+
+**Thread Title:** `✅ 👷🏽‍♂️ 🏗️ [build-orchestrator-v2] W3.1: Build Status Script`
+
+**Summary:** [1-2 sentence summary of what was accomplished]
+```
 
 ## Worker Step 3: Write Handoff Summary
 
@@ -112,16 +160,58 @@ python3 N5/scripts/session_state_manager.py update --convo-id {CONVO_ID} \
   --status complete --message "Worker handoff ready for orchestrator review"
 ```
 
-## Worker Step 5: Notify Orchestrator
+## Worker Step 5: Write Structured Completion
 
-**⚠️ PENDING IMPLEMENTATION**: The `build_worker_complete.py` script will be added during upgrade. For now, skip this step — the orchestrator will detect worker completion via SESSION_STATE status.
+**For v2 builds:** Use `update_build.py` to write structured completion data:
 
 ```bash
-# python3 N5/scripts/build_worker_complete.py --convo-id {CONVO_ID} \
-#   --build-id {BUILD_ID} --worker-num {WORKER_NUM}
+# First verify the script exists (graceful degradation)
+if [ -f "N5/scripts/update_build.py" ]; then
+  python3 N5/scripts/update_build.py complete {build_slug} {worker_id} \
+    --status "complete" \
+    --summary "What was accomplished" \
+    --artifacts "comma,separated,file,paths" \
+    --learnings "Key insights, decisions made, things that worked" \
+    --concerns "Issues for orchestrator attention, blockers, risks" \
+    --dependencies "W1.1,W1.2"  # Workers this work depended on
+else
+  # Fallback to legacy script
+  python3 N5/scripts/build_worker_complete.py \
+    --build-id {build_slug} \
+    --worker-num {worker_num} \
+    --status complete
+fi
 ```
 
-This notifies the orchestrator that worker `{WORKER_NUM}` for build `{BUILD_ID}` is complete.
+**Gather this information by reviewing:**
+- What was the mission? Was it accomplished?
+- What files were created/modified?
+- What did you learn that the orchestrator should know?
+- Any concerns, blockers, or risks to flag?
+
+**Completion JSON format:**
+```json
+{
+  "worker_id": "W1.1",
+  "status": "complete",
+  "completed_at": "2026-01-18T15:30:00Z",
+  "convo_id": "con_XXXXX",
+  "summary": "What was accomplished",
+  "artifacts": ["path/to/file1.py", "path/to/file2.md"],
+  "learnings": "Key insights and decisions",
+  "concerns": "Issues needing orchestrator attention",
+  "dependencies_used": ["W1.1", "W1.2"]
+}
+```
+
+**For legacy builds (build_id + worker_num):**
+
+Use the legacy notification script:
+
+```bash
+python3 N5/scripts/build_worker_complete.py --build-id {build_id} --worker-num {worker_num} \
+  --status {complete|partial|blocked} --summary "..."
+```
 
 ## Worker Step 6: DO NOT COMMIT
 
@@ -161,18 +251,6 @@ Review the recommendation. Override with `--tier=N` if needed.
 
 ## Full Step 2: Execute Mechanical Close
 
-**⚠️ PENDING IMPLEMENTATION**: The tier-specific execution scripts (`conversation_end_quick.py`, `conversation_end_standard.py`, `conversation_end_full.py`) will be added during upgrade. For now, execute mechanical steps manually based on tier:
-
-```bash
-# Determine tier first
-python3 N5/scripts/conversation_end_router.py --convo-id {CONVO_ID}
-
-# Tier 1: Archive conversation workspace
-# Tier 2: Gather file lists, git status
-# Tier 3: Full analysis bundle including context
-```
-
-**When scripts are available:**
 ```bash
 # Tier 1
 python3 N5/scripts/conversation_end_quick.py --convo-id {CONVO_ID}
@@ -186,10 +264,8 @@ python3 N5/scripts/conversation_end_full.py --convo-id {CONVO_ID}
 
 ## Full Step 3: PII Audit
 
-**⚠️ PENDING IMPLEMENTATION**: The `conversation_pii_audit.py` script will be added during upgrade. For now, manually review files for PII before archiving.
-
 ```bash
-# python3 N5/scripts/conversation_pii_audit.py --convo-id {CONVO_ID} --auto-mark
+python3 N5/scripts/conversation_pii_audit.py --convo-id {CONVO_ID} --auto-mark
 ```
 
 Skip if conversation was purely discussion with no file creation.
@@ -197,6 +273,8 @@ Skip if conversation was purely discussion with no file creation.
 ## Full Step 4: If Orchestrator — Review Workers
 
 **For orchestrator threads only:**
+
+### Standard Orchestrator Review
 
 1. List spawned workers:
    ```bash
@@ -208,12 +286,34 @@ Skip if conversation was purely discussion with no file creation.
    - Read its handoff summary
    - Verify artifacts exist
 
-3. Generate consolidated summary:
+### V2 Build Orchestrator Review
+
+For v2 builds with a build folder:
+
+1. **Read all completions:**
+   ```bash
+   python3 N5/scripts/update_build.py status {build_slug}
+   ```
+
+2. **Review learnings and concerns** from all workers:
+   ```bash
+   ls N5/builds/{build_slug}/completions/
+   # Read each W*.json file for details
+   ```
+
+3. **Aggregate worker summaries:**
    ```markdown
    ## Workers Summary
-   - **W1 (con_XXX):** ✅ Import path fixes — 3 services updated
-   - **W2 (con_YYY):** ✅ Calendar webhook — new service deployed
-   - **W3 (con_ZZZ):** ⚠️ Partial — needs follow-up on X
+   - **W1.1:** ✅ Complete — [summary from completion]
+     - Learnings: [key insights]
+     - Concerns: [any flags]
+   - **W1.2:** ✅ Complete — [summary]
+   - **W2.1:** ⚠️ Partial — [what's missing]
+   ```
+
+4. **Close the build (after all commits):**
+   ```bash
+   python3 N5/scripts/update_build.py close {build_slug}
    ```
 
 ## Full Step 5: Invoke Librarian for Semantic Close
@@ -337,17 +437,14 @@ Present formatted close output. End with:
 
 ## Documentation
 
-- **Spec:** `file 'N5/prefs/operations/conversation-end-v3.md'` (v3.0)
+- **Spec:** `file 'N5/prefs/operations/conversation-end-v3.md'`
 - **Emoji Legend:** `file 'N5/config/emoji-legend.json'`
 - **Positions System:** `file 'N5/scripts/positions.py'`
-- **Router:** `file 'N5/scripts/conversation_end_router.py'` (v3.0)
-
-**⚠️ Implementation Status:**
-- ✅ **Implemented**: Router, SESSION_STATE integration, mode/tier detection, positions.py
-- ⏳ **Pending (upgrade work)**: Tier-specific execution scripts, PII audit, capability graduation, worker notification
 
 ## Version History
 
+- **v5.3** (2026-01-18): Fixed Worker Step 2 - post-close title now generates 3-slot emoji prefix based on outcome while preserving pre-decided base title. Pre-decided title is for thread naming at launch; post-close title reflects what actually happened.
+- **v5.2** (2026-01-18): V2 build orchestration support. Pre-decided title from `thread_title`. Structured completion via `update_build.py` with learnings/concerns fields. Orchestrator close reads completions before commit.
 - **v5.1** (2026-01-18): Added build_id/worker_num detection. Added Worker Step 5 (build_worker_complete.py notification). Clearer mode detection priority.
 - **v5.0** (2026-01-15): Two-mode system (Worker Close vs Full Close). Workers defer commits. 3-slot emoji required (📌 for normal). Greppable [Parent-Topic] tags for workers.
 - **v4.0** (2026-01-15): Folded Type B position extraction. Title generation now semantic.

@@ -5,7 +5,7 @@ __pycache__/
 .Python
 *.egg-info/
 dist/
-build/
+/build/
 .DS_Store
 *.db
 *.sqlite

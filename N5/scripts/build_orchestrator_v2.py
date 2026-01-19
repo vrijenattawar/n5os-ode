@@ -32,7 +32,11 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-ORCHESTRATION_DIR = Path("/home/workspace/N5/builds")
+try:
+    from N5.lib.paths import N5_BUILDS_DIR
+    ORCHESTRATION_DIR = N5_BUILDS_DIR
+except ImportError:
+    ORCHESTRATION_DIR = Path("/home/workspace/N5/builds")
 
 
 def get_project_dir(project: str) -> Path:
@@ -247,7 +251,11 @@ def approve_work(project: str, worker_id: str) -> dict:
 
 
 def generate_spawn_command(project: str, worker_id: str, parent_id: str) -> dict:
-    """Generate the spawn_worker_v2 command for a specific worker."""
+    """Generate copy-paste spawn instructions with BUILD_CONTEXT for a worker.
+    
+    Returns instructions that can be pasted into a new conversation to spawn
+    the worker with proper build context for tracking.
+    """
     plan = load_plan(project)
     if not plan:
         return {"error": f"Project '{project}' not found"}
@@ -261,28 +269,51 @@ def generate_spawn_command(project: str, worker_id: str, parent_id: str) -> dict
     if not worker:
         return {"error": f"Worker '{worker_id}' not found"}
     
-    # Build context for spawn_worker_v2
-    context = {
-        "instruction": worker.get("description", f"Complete {worker['component']} component"),
-        "parent_focus": plan.get("name", project),
-        "parent_objective": plan.get("objective", "Complete the build"),
-        "parent_status": f"Orchestrating {plan.get('name')} - spawning {worker_id}",
-        "parent_type": "build",
-        "key_decisions": plan.get("key_decisions", []),
-        "relevant_files": worker.get("relevant_files", plan.get("relevant_files", [])),
-        "additional_context": f"This is worker {worker_id} for component: {worker['component']}\n\nDependencies: {', '.join(worker.get('dependencies', [])) or 'None'}"
-    }
+    # Extract worker number from id (e.g., "worker_1" -> 1, or just "1" -> 1)
+    worker_num = worker_id
+    if worker_id.startswith("worker_"):
+        worker_num = worker_id.replace("worker_", "")
     
-    context_json = json.dumps(context)
+    # Build the spawn instructions with BUILD_CONTEXT
+    project_name = plan.get("name", project)
+    component = worker.get("component", worker_id)
+    description = worker.get("description", f"Complete {component}")
+    relevant_files = worker.get("relevant_files", plan.get("relevant_files", []))
+    dependencies = worker.get("dependencies", [])
     
-    command = f"""python3 N5/scripts/spawn_worker_v2.py \\
-    --parent {parent_id} \\
-    --context '{context_json}'"""
+    files_list = "\n".join(f"- `file '{f}'`" for f in relevant_files) if relevant_files else "- See DESIGN.md"
+    deps_note = f"Dependencies: {', '.join(dependencies)}" if dependencies else "No dependencies"
+    
+    instructions = f"""Execute Worker {worker_num} ({component}):
+
+BUILD_CONTEXT:
+  build: {project}
+  worker: {worker_num}
+  parent_topic: {project_name}
+
+CONTEXT:
+{deps_note}
+Relevant files:
+{files_list}
+
+INSTRUCTIONS:
+- Read: `file 'N5/builds/{project}/DESIGN.md'`
+- Read: `file 'N5/builds/{project}/PLAN.md'`
+
+DELIVERABLES:
+{description}
+
+When complete:
+1. Update `file 'N5/builds/{project}/STATUS.md'` with results
+2. Run close conversation workflow (will auto-notify orchestrator)
+"""
     
     return {
         "worker_id": worker_id,
-        "command": command,
-        "context": context
+        "worker_num": worker_num,
+        "component": component,
+        "instructions": instructions,
+        "note": "Copy and paste these instructions into a new conversation to spawn the worker"
     }
 
 
