@@ -28,17 +28,15 @@ Think of N5OS Ode as firmware for your AI. Out of the box, Zo is a powerful but 
 
 ## Quick Start
 
-### 1. Clone and Install
+### 1. Install (One Command)
+
+Open Zo's terminal or ask Zo to run:
 
 ```bash
-# Clone the repo
-git clone https://github.com/vrijenattawar/n5os-ode.git
-
-# Run the installer (moves contents to workspace root)
-cd n5os-ode && bash install.sh
+git clone https://github.com/vrijenattawar/n5os-ode.git && cd n5os-ode && bash install.sh
 ```
 
-The installer moves N5OS files to your workspace root and cleans up the repo folder.
+This clones the repo, moves everything to your workspace root, and cleans up.
 
 ### 2. Run the Bootloader
 
