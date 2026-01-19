@@ -28,15 +28,20 @@ Think of N5OS Ode as firmware for your AI. Out of the box, Zo is a powerful but 
 
 ## Quick Start
 
-### 1. Install (One Command)
+### 1. Install to Workspace Root
 
-Open Zo's terminal or ask Zo to run:
+> ⚠️ **IMPORTANT:** N5OS Ode files must live at your workspace ROOT, not inside a subfolder.
+> The `Prompts/`, `N5/`, `Knowledge/` folders should be directly in `/home/workspace/`, NOT in `/home/workspace/n5os-ode/`.
+
+**One command does everything:**
 
 ```bash
 git clone https://github.com/vrijenattawar/n5os-ode.git && cd n5os-ode && bash install.sh
 ```
 
-This clones the repo, moves everything to your workspace root, and cleans up.
+This clones the repo, moves all contents to your workspace root, and cleans up the `n5os-ode/` folder.
+
+**Verify it worked:** You should see `Prompts/`, `N5/`, `BOOTLOADER.prompt.md` etc. directly in your workspace root — NOT inside an `n5os-ode/` folder.
 
 ### 2. Run the Bootloader
 
