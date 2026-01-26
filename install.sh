@@ -73,3 +73,42 @@ echo "  1. Open a new Zo conversation"
 echo "  2. Run: @BOOTLOADER.prompt.md"
 echo "  3. Then: @PERSONALIZE.prompt.md"
 echo ""
+
+# ===== Skills Installation =====
+echo "📦 Setting up Skills..."
+
+# Create Skills directory if needed
+mkdir -p Skills
+
+# Copy skills from repo
+if [ -d "n5os-ode/Skills" ]; then
+    cp -r n5os-ode/Skills/* Skills/ 2>/dev/null || true
+fi
+
+# Create N5/config if needed
+mkdir -p N5/config
+
+# Copy config templates
+if [ -d "n5os-ode/templates/configs" ]; then
+    for template in n5os-ode/templates/configs/*.template; do
+        target="N5/config/$(basename "$template" .template)"
+        if [ ! -f "$target" ]; then
+            cp "$template" "$target"
+            echo "  Created: $target (from template - edit with your values)"
+        fi
+    done
+fi
+
+# Create Personal/Meetings directory structure
+mkdir -p Personal/Meetings/Inbox
+
+echo "✅ Skills installed"
+echo ""
+echo "📝 Next steps for Meeting Ingestion:"
+echo "   1. Edit N5/config/drive_locations.yaml with your Google Drive folder ID"
+echo "   2. Connect Google Drive in Zo Settings > Integrations"
+echo "   3. Test with: python3 Skills/meeting-ingestion/scripts/meeting_cli.py status"
+echo ""
+echo "📝 Next steps for Pulse:"
+echo "   1. Create a build: mkdir -p N5/builds/my-build/{drops,deposits,artifacts}"
+echo "   2. See Skills/pulse/SKILL.md for full documentation"

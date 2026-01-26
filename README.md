@@ -158,6 +158,41 @@ Plus reflection blocks (R01, R02, R06) for journaling.
 
 → See [docs/BLOCK_SYSTEM.md](docs/BLOCK_SYSTEM.md) for full details
 
+
+### Skills
+
+N5OS includes packaged skills for advanced workflows:
+
+| Skill | Description |
+| --- | --- |
+| **meeting-ingestion** | Pull transcripts from Google Drive, generate intelligence blocks (B01-B28), track in registry |
+| **pulse** | Automated build orchestration - spawn parallel workers, validate deposits, escalate blockers |
+
+**Meeting Ingestion Quick Start:**
+```bash
+# Check status
+python3 Skills/meeting-ingestion/scripts/meeting_cli.py status
+
+# Pull new transcripts
+python3 Skills/meeting-ingestion/scripts/meeting_cli.py pull --dry-run
+
+# Process meetings
+python3 Skills/meeting-ingestion/scripts/meeting_cli.py process
+```
+
+**Pulse Quick Start:**
+```bash
+# Initialize a build
+mkdir -p N5/builds/my-build/{drops,deposits,artifacts}
+
+# Start build
+python3 Skills/pulse/scripts/pulse.py start my-build
+
+# Check status
+python3 Skills/pulse/scripts/pulse.py status my-build
+```
+
+→ See [Skills/meeting-ingestion/SKILL.md](Skills/meeting-ingestion/SKILL.md) and [Skills/pulse/SKILL.md](Skills/pulse/SKILL.md) for full documentation
 ### Semantic Memory (Optional)
 
 If you have an OpenAI API key, N5OS Ode can build a semantic memory layer:
@@ -240,6 +275,9 @@ workspace/
 ├── Records/                 # Date-organized records
 │   └── journal/             # Journal entries
 ├── Prompts/                 # Reusable workflows
+├── Skills/                   # Packaged workflows
+│   ├── meeting-ingestion/   # Meeting transcript processing
+│   └── pulse/               # Build orchestration
 │   ├── Blocks/              # Block generators
 │   └── reflections/         # Reflection templates
 ├── BOOTLOADER.prompt.md     # Installation script

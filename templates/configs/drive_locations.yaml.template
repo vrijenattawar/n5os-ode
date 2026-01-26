@@ -1,0 +1,15 @@
+# Meeting Ingestion - Google Drive Configuration
+# Copy this file to N5/config/drive_locations.yaml and fill in your values
+
+# Google Drive folder ID for meeting transcripts
+# Find this in your Drive URL: https://drive.google.com/drive/folders/<FOLDER_ID>
+meeting_transcripts_folder_id: "YOUR_GOOGLE_DRIVE_FOLDER_ID"
+
+# Optional: Processed meetings archive folder
+archive_folder_id: "YOUR_ARCHIVE_FOLDER_ID"
+
+# Meeting output directory (relative to workspace)
+meetings_output_dir: "Personal/Meetings"
+
+# Staging directory for new transcripts
+staging_dir: "Personal/Meetings/Inbox"
