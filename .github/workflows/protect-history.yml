@@ -1,0 +1,27 @@
+name: History Protection Alert
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  check-history:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Check commit count
+        run: |
+          COMMIT_COUNT=$(git rev-list --count HEAD)
+          echo "Commit count: $COMMIT_COUNT"
+          
+          if [ "$COMMIT_COUNT" -lt 10 ]; then
+            echo "::warning::Low commit count detected ($COMMIT_COUNT). This may indicate a force push that reset history."
+            echo "If this was intentional, ignore this warning."
+            echo "If accidental, restore from backup branch."
+          fi
+      
+      - name: List recent commits
+        run: git log --oneline -10

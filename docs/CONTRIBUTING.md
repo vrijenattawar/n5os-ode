@@ -44,6 +44,32 @@ Types:
 3. Run `python3 N5/scripts/validate_repo.py`
 4. Submit PR with description
 
+## Sync Protocol
+
+Before starting any work on N5OS Ode:
+
+1. **Always pull first:**
+   ```bash
+   cd N5/export/n5os-ode
+   git pull origin main
+   ```
+
+2. **Before pushing, run sync check:**
+   ```bash
+   python3 N5/scripts/ode_sync_check.py
+   ```
+
+3. **Never force push** unless restoring from a known good state.
+
+4. **If working from multiple machines** (local, Devin, etc.), designate one as source of truth.
+
+### Recovery
+
+If history is accidentally lost:
+1. Check for backup branches: `git branch -r | grep backup`
+2. Restore: `git reset --hard origin/backup-<name>`
+3. Force push the restored history: `git push --force-with-lease origin main`
+
 ## Questions?
 
 Open an issue on GitHub.
