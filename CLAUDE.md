@@ -7,7 +7,7 @@ provenance: con_H7bSTDBcsH0gBtFG
 
 # N5OS Environment — Claude Code Adapter
 
-**Owner:** V (Vrijen Attawar)
+**Owner:** _(your name — set during PERSONALIZE)_
 **System:** N5OS on Zo Computer
 **Fast map:** `WORKSPACE_MAP.md` · **Canonical contract:** `AGENTS.md` · **Shared harness contract:** `N5/HARNESS_CONTRACT.md` · **Session-state policy:** `N5/SESSION_STATE_POLICY.md` · **Placement authority:** `POLICY.md`
 
@@ -48,22 +48,27 @@ For non-trivial work, load shared docs in this order:
 4. `N5/SESSION_STATE_POLICY.md`
 5. Specialized protocol docs only as needed
 
-Then use `/load-context <context>` only when deeper domain-specific preferences are needed.
+Then load domain context with the context loader (the Operator persona runs this as its first action):
 
-Available context bundles:
+```bash
+python3 N5/scripts/n5_load_context.py "<group-or-intent>"
+```
 
-| Context | Use For |
+Available groups (authoritative source: `N5/prefs/context_manifest.yaml`):
+
+| Group | Use For |
 |---------|---------|
-| `system_ops` | System admin, file operations, git work |
-| `content_generation` | Writing, documents, social posts |
-| `crm_operations` | Contact management, stakeholder tracking |
-| `code_work` | Code modifications, multi-file changes |
-| `scheduling` | Scheduled tasks, calendar ops |
-| `research` | Deep research, stakeholder analysis |
-| `build` | Implementation, refactoring, engineering |
-| `full` | Load all modules (**use sparingly**) |
+| `build` | Implementation, refactoring, coding, engineering |
+| `strategy` | High-level thinking, planning, decisions, reasoning |
+| `system` | Lists, index, system operations, database |
+| `safety` | Destructive ops, moves, deletes |
+| `scheduler` | Agents, scheduled tasks, automation |
+| `writer` | Content creation, writing, polished communication |
+| `research` | Deep dive, analysis, web research |
+| `health` | Health planning, bio-context (empty until personalized) |
+| `general` | Fallback for novel or undefined tasks |
 
-Or load a specific file: `/load-context file 'N5/prefs/path/to/module.md'`
+You can also pass a natural-language intent (e.g. `"fix the failing script"`) or a specific file path. Run `python3 N5/scripts/n5_load_context.py --list` to see all groups.
 
 Default state: only core principles and safety rules are loaded. Load additional context as tasks require it.
 
@@ -108,12 +113,9 @@ Before delete/move operations on these directories, use `n5_protect_check`:
 
 ## Configuration Quick Reference
 
-**Port Registry:** `N5/config/PORT_REGISTRY.md` is the SSOT for port allocation.
-CLI: `python N5/scripts/port_registry.py check/next/list/sync`
+**Context manifest:** `N5/prefs/context_manifest.yaml` — the groups the context loader reads.
 
-**Commands Registry:** `N5/config/commands.jsonl` — search before creating new commands.
-
-**Drive Integration:** `N5/config/drive_locations.yaml` — Google Drive folder ID mapping.
+**Config templates:** `N5/templates/configs/*.template` — copied into place by `install.sh`. Personal registries (port registry, commands registry, Drive folder mapping) are **not** shipped in the base distribution; create them under `N5/config/` if and when you need those subsystems.
 
 ---
 
@@ -123,9 +125,10 @@ These are not rules to memorize — search for them when the task requires speci
 
 | Domain | File |
 |--------|------|
+| **Persona / specialist routing** (the conversation-orientation brain) | `N5/prefs/system/persona_routing_contract.md` |
 | Think-Plan-Execute | `N5/prefs/operations/planning_prompt.md` |
 | Recipe execution | `N5/prefs/operations/recipe-execution-guide.md` |
-| Task routing | `N5/prefs/protocols/task_routing_protocol.md` |
+| Message→task automation (example integration; genericize before use) | `N5/prefs/protocols/task_routing_protocol.md` |
 | File creation | `N5/prefs/operations/file-creation-protocol.md` |
 | Artifact placement | `N5/prefs/operations/artifact-placement.md` |
 | File protection | `N5/prefs/system/file-protection.md` |

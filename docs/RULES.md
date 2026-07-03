@@ -17,7 +17,7 @@ N5OS Ode includes **6 core rules** that govern AI behavior across all conversati
 
 | Rule | Condition | Purpose |
 |------|-----------|---------|
-| **Session State Init** | Conversation start | Track conversation context |
+| **Session State Init** (opt-in) | Multi-phase build/orchestration lanes only | Track conversation context when continuity is needed |
 | **YAML Frontmatter** | Creating markdown | Trace document provenance |
 | **Progress Reporting (P15)** | Reporting completion | Prevent false "done" claims |
 | **File Protection** | Destructive operations | Prevent accidental data loss |
@@ -28,17 +28,19 @@ N5OS Ode includes **6 core rules** that govern AI behavior across all conversati
 
 ## Rule Details
 
-### 1. Session State Initialization
+### 1. Session State Initialization (opt-in)
 
-**Condition**: At the start of every conversation
+**Condition**: Only when the lane calls for it per `N5/SESSION_STATE_POLICY.md` — multi-phase build/orchestration, Pulse/drop/build-close, or work that must resume or produce structured closeout. **Off by default.**
 
-**Instruction**: Check if SESSION_STATE.md exists. If missing, create it with:
+**Instruction**: For qualifying lanes only, check if SESSION_STATE.md exists. If missing, create it with:
 - Conversation type (build, research, discussion, planning)
 - Focus/objective
 - Conversation ID for tracking
 
+Do **not** create SESSION_STATE.md for ordinary Q&A, lookups, or small edits.
+
 **Why This Exists**:
-Without state tracking, long conversations lose context. The AI forgets what was accomplished, what's pending, and what the original goal was. SESSION_STATE.md provides continuity.
+For long multi-phase work, state tracking prevents context loss across turns — the AI can lose track of what was accomplished, what's pending, and the original goal. For short conversations it adds no value and is skipped.
 
 **Format**:
 ```yaml

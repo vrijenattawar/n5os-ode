@@ -35,7 +35,7 @@ The Conversation Registry is a SQLite database that tracks all your conversation
 
 ### SESSION_STATE.md
 
-Created at the start of every conversation in the conversation workspace (`/home/.z/workspaces/con_XXX/`). Contains:
+Created in the conversation workspace (`/home/.z/workspaces/con_XXX/`) only for lanes that need continuity — off by default per `N5/SESSION_STATE_POLICY.md`. When present, it contains:
 
 - **Metadata**: Type, mode, focus, objective, status
 - **Progress**: Overall %, current phase, next actions
@@ -233,11 +233,12 @@ ORDER BY a.created_at DESC;
 
 ## Integration with Rules
 
-The "Session State Initialization" rule ensures every conversation gets a SESSION_STATE.md:
+The "Session State Initialization" rule is **opt-in** — session state is created only for lanes that need continuity (multi-phase build/orchestration, Pulse/drop/build-close, or resumable/closeout work) per `N5/SESSION_STATE_POLICY.md`. It is **off by default**:
 
 ```
-At the start of every conversation, check if SESSION_STATE.md exists.
+When the lane requires continuity, check if SESSION_STATE.md exists.
 If missing: create it with type, focus, and initial objective.
+Otherwise (quick Q&A, lookups, small edits): skip it entirely.
 ```
 
 ## Best Practices

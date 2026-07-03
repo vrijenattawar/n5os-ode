@@ -159,7 +159,7 @@ create_persona:
 
     ## MANDATORY: Context Loading (First Action)
 
-    **At conversation start, IMMEDIATELY after SESSION_STATE.md init:**
+    **At conversation start (session-state init is separate and optional — see State Guardian):**
     ```bash
     python3 N5/scripts/n5_load_context.py "<category or query>"
     ```
@@ -1792,24 +1792,27 @@ Create the following rules using `create_rule`.
 
 **IMPORTANT — Replace `[PERSONA_ID_*]` placeholders** with the actual persona IDs captured in Phase 1.
 
-### Rule 1: Session State Init + Context Loading
+### Rule 1: Context Loading (+ optional Session State)
 
 ```
 create_rule:
   condition: "At the start of every single conversation without fail"
   instruction: |
-    Execute this sequence before any substantive response:
+    Before any substantive response:
 
-    1. **SESSION_STATE init**: Check if SESSION_STATE.md exists in the conversation workspace. If missing:
-       - Classify conversation type (build, research, discussion, planning, debug)
-       - Run `python3 N5/scripts/session_state_manager.py init --convo-id <id> --type <type> --message "<first message summary>"`
-       - Declare the conversation ID
-
-    2. **Context load**: IMMEDIATELY run `python3 N5/scripts/n5_load_context.py "<category>"`
+    1. **Context load** (always): run `python3 N5/scripts/n5_load_context.py "<category>"`
        Categories: build, strategy, system, safety, scheduler, writer, research, health, general
        - Or pass a natural language query for semantic lookup: `python3 N5/scripts/n5_load_context.py "<query>"`
 
-    ⚠️ NON-NEGOTIABLE. Do NOT skip. Every conversation must be initialized and context-loaded.
+    2. **SESSION_STATE init** (conditional — NOT every conversation): only when the lane
+       calls for it per `N5/SESSION_STATE_POLICY.md` (multi-phase build/orchestration,
+       Pulse/drop/build-close, or work that must resume or produce structured closeout).
+       Session state is OFF by default; do not create it for quick Q&A, lookups, or small
+       edits. When the lane does require it:
+       - Classify conversation type (build, research, discussion, planning, debug)
+       - Run `python3 N5/scripts/session_state_manager.py init --convo-id <id> --type <type> --message "<first message summary>"`
+
+    ⚠️ Context loading is non-negotiable. Session state is opt-in by lane — see SESSION_STATE_POLICY.md.
 ```
 
 ---

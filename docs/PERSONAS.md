@@ -44,8 +44,8 @@ N5OS Ode uses **11 specialist personas** that you can route work to based on the
 - Complex multi-step work that needs sustained focus
 
 **Key Behaviors**:
-- Initializes SESSION_STATE.md at conversation start
-- Updates state every 3-5 exchanges
+- Initializes SESSION_STATE.md only for lanes that need it (opt-in; off by default — see `N5/SESSION_STATE_POLICY.md`)
+- When state is active, updates it every 3-5 exchanges
 - Returns control after any specialist completes work
 
 ---

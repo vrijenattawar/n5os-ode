@@ -9,6 +9,9 @@ provenance: con_jL5x88AR1IB8Mvab
 
 This file governs when `SESSION_STATE.md` is required, optional, or skipped.
 
+## Default: OFF
+**Session state is opt-in.** Most conversations do not need it and should not create it. A fresh install should never auto-generate `SESSION_STATE.md` for ordinary Q&A, lookups, or small edits — that is pure ceremony. Only initialize it when the lane below genuinely calls for continuity, resumability, or structured closeout. When in doubt, skip it; the close pipeline degrades gracefully when the file is absent.
+
 ## Core Principle
 Keep runtime compatibility intact while reducing unnecessary startup work.
 
@@ -16,7 +19,7 @@ Do not remove session-state consumers first. Change initialization policy first,
 
 ## Policy Levels
 
-### Required
+### Required (opt-in — the only lanes that create session state by default)
 Initialize or refresh conversation-local `SESSION_STATE.md` when the thread is in any of these lanes:
 - build or orchestration work
 - Pulse/drop/build-close flows
