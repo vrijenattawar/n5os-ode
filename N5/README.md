@@ -1,7 +1,7 @@
 ---
 created: 2026-01-15
-last_edited: 2026-06-10
-version: 1.1
+last_edited: 2026-07-03
+version: 1.2
 ---
 # N5 Directory
 
@@ -13,6 +13,7 @@ Core system files for N5OS-Ode.
 |-----------|---------|
 | `scripts/` | Python utilities for system operations |
 | `prefs/` | Configuration, context manifests, style guides |
+| `personas/` | Git-tracked persona prompt source of truth |
 | `schemas/` | JSON schemas for data validation |
 | `docs/` | System documentation |
 
@@ -27,6 +28,7 @@ Core system files for N5OS-Ode.
 | `init_build.py` | Build workspace creation | `python3 N5/scripts/init_build.py my-build --title "Title"` |
 | `build_contract_check.py` | Build pre-start contract gate | `python3 N5/scripts/build_contract_check.py my-build` |
 | `close_contract_check.py` | Close workflow contract gate | `python3 N5/scripts/close_contract_check.py --checklist path/to/checklist.json` |
+| `persona_sync.py` | Persona SSOT check/sync tool | `python3 N5/scripts/persona_sync.py check` |
 
 ## Configuration
 

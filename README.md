@@ -19,7 +19,7 @@ N5OS Ode transforms Zo from a general-purpose AI assistant into a structured thi
 
 Think of N5OS Ode as firmware for your AI. Out of the box, Zo is a powerful but generic assistant. N5OS Ode adds:
 
-- **Specialist Personas** — 11 focused modes (Operator, Builder, Researcher, Writer, Strategist, Debugger, Architect, Teacher, Designer, Illustrator, Level Upper) that excel at different work types
+- **Specialist Personas** — 11 focused modes (Operator, Builder, Researcher, Writer, Strategist, Debugger, Architect, Teacher, Designer, Illustrator, Level Upper) stored as a git-tracked SSOT in `N5/personas/`
 - **Behavioral Rules** — 13 persistent instructions that shape AI behavior across all conversations
 - **Conversation State** — Memory that persists across long sessions
 - **Structured Outputs** — S-shape meeting artifacts that transform transcripts into reusable intelligence
@@ -134,6 +134,15 @@ Routes to the research specialist.
 → See [docs/PERSONAS.md](docs/PERSONAS.md) for full details
 
 → See [docs/ROUTING.md](docs/ROUTING.md) for persona choreography
+
+Persona prompts are managed as code:
+
+```bash
+python3 N5/scripts/persona_sync.py check
+python3 N5/scripts/persona_sync.py --self-test
+```
+
+The packaged `N5/personas/registry.json` uses `PERSONA_ID_*` placeholders until installation creates live Zo personas.
 
 ### Behavioral Rules
 
@@ -326,6 +335,7 @@ After installation:
 workspace/
 ├── N5/                      # System intelligence
 │   ├── prefs/               # Preferences and config
+│   ├── personas/            # Git-tracked persona prompt SSOT
 │   ├── scripts/             # Utility scripts
 │   └── cognition/           # Semantic memory (optional)
 ├── Knowledge/               # Long-term reference

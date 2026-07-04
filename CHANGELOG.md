@@ -9,6 +9,17 @@ provenance: sanitized
 
 All notable changes to n5OS-Ode are documented here.
 
+## [2.3.0] - 2026-07-03
+
+### Added
+- Added personas-as-code support with `N5/personas/` as the packaged persona prompt SSOT.
+- Added `N5/scripts/persona_sync.py` for offline persona consistency checks and optional live Zo export/diff/push in installed workspaces.
+- Added a generic 11-persona registry using `PERSONA_ID_*` placeholders until bootloader installation creates live Zo persona IDs.
+
+### Changed
+- Updated the persona routing contract to align with the SSOT registry and remove stale mirror-file assumptions.
+- Updated persona documentation and Pulse learning-drop references to use `N5/personas/` instead of retired `Documents/System/personas/` mirrors.
+
 ## [2.0.1] - 2026-05-07
 
 ### Fixed

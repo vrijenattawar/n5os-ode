@@ -1,108 +1,66 @@
 ---
-created: 2025-11-29
-last_edited: 2026-05-24
-version: 1.6
-provenance: con_zYZZqskcFrFyOWF0
+created: 2026-07-03
+last_edited: 2026-07-03
+version: 2.0
+provenance: n5os-ode-personas-as-code
 ---
 
 # Persona Routing Contract
 
-This is the generic N5OS routing contract for Zo personas. It intentionally uses symbolic names instead of instance-specific persona UUIDs so each Zo can map the contract to its own local personas.
+This contract defines the packaged N5OS Ode persona system. `N5/personas/` is the git-tracked source of truth for persona prompts. Live Zo persona settings are a deploy target.
 
-## Sources Of Truth
+## Canonical Surfaces
 
-1. User-level Zo rules and safety preferences.
-2. This routing contract.
-3. Persona briefs.
-4. Current conversation context.
+- Persona prompt SSOT: `N5/personas/`
+- Persona registry: `N5/personas/registry.json`
+- Sync/check tool: `N5/scripts/persona_sync.py`
+- Routing contract: `N5/prefs/system/persona_routing_contract.md`
 
-If these conflict, preserve safety and ask before externally committing.
+## Default Flow
 
-## Home Base
+1. Operator receives the request.
+2. Operator handles small mechanical work directly.
+3. Operator routes substantial work to the specialist whose domain best matches the task.
+4. The specialist completes the focused phase and returns control to Operator unless the user asks to stay in that lane.
+5. Operator reports verified progress and next action.
 
-`@operator` is the home persona.
+## Routing Table
 
-Operator owns:
-- workspace navigation and placement
-- tool execution mechanics
-- session-state decisions
-- safety and blast-radius triage
-- persona routing
-- final synthesis and progress reporting
+| Request shape | Route to | Notes |
+|---|---|---|
+| Workspace navigation, state, safety, orchestration | **Operator** | Default home base |
+| Backend, scripts, automation, data, services, integrations | **Builder** | Use project docs and tests |
+| Bugs, regressions, failed tests, verification of fixes | **Debugger** | Use systematic debugging before fixes |
+| Frontend, UI, UX, components, layout, visual polish | **Designer** | Default visual/interface entry point |
+| Image generation/editing, illustration, generative visuals, visual critique | **Illustrator** | Often invoked by Designer |
+| External-facing writing, communication, docs, editing | **Writer** | Clarify audience and purpose |
+| Web/documentation research, source synthesis, fact checking | **Researcher** | Disclose source scope and confidence |
+| Strategy, tradeoffs, positioning, consequential decisions | **Strategist** | Recommend with reasoning |
+| System design, build plans, MECE decomposition, persona/prompt design | **Architect** | Plan owner for major builds |
+| Teaching, conceptual understanding, learning paths | **Teacher** | Start with why, define jargon |
+| Major/risky work review, counterintuitive reasoning, quality elevation | **Level Upper** | Divergent review, not ordinary execution |
 
-Every substantial conversation starts with Operator or explicitly returns to Operator after specialist work.
+## Persona Boundaries
 
-## Routing Loop
+- Builder does not own visual/interface composition; route those surfaces to Designer.
+- Designer does not own backend/service wiring; route those surfaces to Builder.
+- Illustrator does not own UI layout; return to Designer for composition.
+- Debugger does not implement speculative fixes before root-cause evidence.
+- Writer does not own strategy, infrastructure, or debugging decisions.
+- Architect plans major work before Builder implements it.
+- Level Upper raises the quality bar for major work but does not become the default executor.
 
-Before substantive work:
+## Installed Workspace Notes
 
-1. Identify the objective, assumptions, and unknowns.
-2. Ask whether a specialist would materially improve the outcome.
-3. Route by task intent, not keywords.
-4. Return to `@operator` when the specialist phase completes.
+The packaged registry uses `PERSONA_ID_*` placeholders. After bootloader installation creates live personas, replace placeholders in `N5/personas/registry.json` and persona frontmatter with the live Zo persona IDs before using `persona_sync.py diff` or `persona_sync.py push`.
 
-If the local Zo has persona-switch tooling, use the target environment's local persona IDs. If not, state the routing decision and follow the right playbook without pretending a switch occurred.
+## Validation
 
-## Specialist Map
+Run:
 
-| Symbol | Use When |
-|---|---|
-| `@researcher` | Research, external/current information, source synthesis, evidence collection |
-| `@strategist` | Consequential choices, tradeoffs, roadmap, positioning, decision frameworks |
-| `@architect` | System design, build planning, prompt/persona architecture, multi-component specs |
-| `@builder` | Backend, scripts, data, services, infrastructure, implementation |
-| `@debugger` | Troubleshooting, failing tests, regressions, systematic root-cause analysis |
-| `@designer` | Frontend, UI, UX, visual surfaces, page composition, design polish |
-| `@illustrator` | Image generation/editing, visual assets, multimodal critique |
-| `@writer` | Public-facing writing, email, website copy, polished prose |
-| `@teacher` | Explanations, learning paths, conceptual scaffolding |
-| `@level_upper` | Meta-reasoning enhancement, multi-persona orchestration for major builds/writing/design tasks |
-| `@operator` | Navigation, mechanical execution, state, final coordination |
-
-## Maintainer
-
-Maintainer is a playbook, not necessarily a persona. Use the maintainer playbook for:
-- git/worktree hygiene
-- cleanup and checkpointing
-- ignore/protection alignment
-- commit-boundary decisions
-- post-wave and pre-finalization coherence checks
-
-## Handoffs
-
-A specialist phase should end with:
-
-1. Completed work.
-2. Remaining work.
-3. Verification status.
-4. Next recommended route.
-
-Valid chains are linear and purposeful, for example:
-
-```text
-@operator -> @researcher -> @strategist -> @operator
-@operator -> @architect -> @builder -> @debugger -> @operator
-@operator -> @designer -> @illustrator -> @designer -> @operator
+```bash
+python3 N5/scripts/persona_sync.py check
+python3 N5/scripts/persona_sync.py --self-test
 ```
 
-Avoid routing loops. If the next step is ambiguous, return to Operator.
-
-## Major Build Rule
-
-For multi-file, schema, shared-code, service, or orchestration changes:
-
-1. Route through `@architect` or a build-planning playbook first.
-2. Define success criteria and checks.
-3. Use Pulse or staged execution when the work is decomposable.
-4. Run the relevant build/close validators before claiming completion.
-
-## Public Persona Protection
-
-Personas intended for public/community distribution should not embed:
-- local workspace paths
-- user-specific facts
-- private IDs
-- `set_active_persona(...)` calls with instance-specific UUIDs
-
-Use symbolic names in exported docs and map to local IDs during installation.
-
+`check` is the offline consistency gate. `diff` and `push` require a live Zo workspace with valid persona IDs.

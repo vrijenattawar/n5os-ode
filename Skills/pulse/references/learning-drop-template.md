@@ -1,7 +1,7 @@
 ---
 created: 2026-02-17
-last_edited: 2026-02-17
-version: 1.0
+last_edited: 2026-07-03
+version: 1.1
 provenance: learning-engaged-builds
 ---
 
@@ -22,9 +22,9 @@ thread_title: "[<slug>] L<stream>.<seq>: Learn — <Concept>"
 
 # Learning Drop: <Concept>
 
-**Mission:** Help V understand <concept> well enough to make informed decisions about <specific decision point in the build>.
+**Mission:** Help the user understand <concept> well enough to make informed decisions about <specific decision point in the build>.
 
-**V's Current Level:** <from understanding_bank.json>
+**User's Current Level:** <from understanding_bank.json>
 
 ---
 
@@ -36,18 +36,18 @@ thread_title: "[<slug>] L<stream>.<seq>: Learn — <Concept>"
 
 | File | Why Read It |
 |------|-------------|
-| `N5/config/understanding_bank.json` | V's current understanding level |
+| `N5/config/understanding_bank.json` | User's current understanding level |
 | `N5/builds/<slug>/PLAN.md` | Build context, Learning Landscape |
 | `<relevant source files>` | Real code examples for grounded teaching |
 
 ## Teaching Approach
 
-Follow Vibe Teacher methodology (Documents/System/personas/vibe_teacher_persona.md):
+Follow Teacher methodology (`N5/personas/teacher.md`):
 
-1. **Start with analogy** from V's domain (career coaching, Careerspan, N5 systems)
+1. **Start with analogy** from the user's domain or the build context
 2. **Explain WHY** this concept exists before HOW it works
-3. **10-15% knowledge stretch** from V's current level — don't jump 50%
-4. **Socratic dialogue** — ask questions, let V connect dots, validate reasoning
+3. **10-15% knowledge stretch** from the user's current level — don't jump 50%
+4. **Socratic dialogue** — ask questions, let the user connect dots, validate reasoning
 5. **Ground in the build** — use actual files and decisions from THIS build, not abstract examples
 6. **Check comprehension** every 2-3 concepts
 
@@ -62,7 +62,7 @@ Write deposit to `N5/builds/<slug>/deposits/<drop_id>.json`:
   "status": "complete",
   "timestamp": "<ISO timestamp>",
   "concepts_covered": ["<concept1>", "<concept2>"],
-  "v_conclusions": ["<decisions or preferences V expressed>"],
+  "user_conclusions": ["<decisions or preferences the user expressed>"],
   "understanding_update": {
     "<concept>": "<new level: encountered/learning/familiar/solid>"
   },
@@ -83,5 +83,5 @@ Write deposit to `N5/builds/<slug>/deposits/<drop_id>.json`:
 | spawn_mode | auto (default) or manual | ALWAYS manual |
 | type | (none) | learning |
 | Goal | Produce artifacts | Produce understanding |
-| Deposit | Artifacts + decisions | Concepts + V's conclusions |
+| Deposit | Artifacts + decisions | Concepts + user conclusions |
 | Blocks build? | May block downstream | Never blocks build |

@@ -1,0 +1,101 @@
+[
+  {
+    "id": "PERSONA_ID_OPERATOR",
+    "slug": "operator",
+    "name": "Operator",
+    "version": "4.1",
+    "file": "operator.md",
+    "char_count": 1032,
+    "exported": "2026-07-03T00:00:00Z"
+  },
+  {
+    "id": "PERSONA_ID_BUILDER",
+    "slug": "builder",
+    "name": "Builder",
+    "version": "3.1",
+    "file": "builder.md",
+    "char_count": 975,
+    "exported": "2026-07-03T00:00:00Z"
+  },
+  {
+    "id": "PERSONA_ID_DEBUGGER",
+    "slug": "debugger",
+    "name": "Debugger",
+    "version": "5.0",
+    "file": "debugger.md",
+    "char_count": 916,
+    "exported": "2026-07-03T00:00:00Z"
+  },
+  {
+    "id": "PERSONA_ID_DESIGNER",
+    "slug": "designer",
+    "name": "Designer",
+    "version": "1.0",
+    "file": "designer.md",
+    "char_count": 944,
+    "exported": "2026-07-03T00:00:00Z"
+  },
+  {
+    "id": "PERSONA_ID_ILLUSTRATOR",
+    "slug": "illustrator",
+    "name": "Illustrator",
+    "version": "1.0",
+    "file": "illustrator.md",
+    "char_count": 941,
+    "exported": "2026-07-03T00:00:00Z"
+  },
+  {
+    "id": "PERSONA_ID_WRITER",
+    "slug": "writer",
+    "name": "Writer",
+    "version": "4.3",
+    "file": "writer.md",
+    "char_count": 978,
+    "exported": "2026-07-03T00:00:00Z"
+  },
+  {
+    "id": "PERSONA_ID_RESEARCHER",
+    "slug": "researcher",
+    "name": "Researcher",
+    "version": "3.1",
+    "file": "researcher.md",
+    "char_count": 913,
+    "exported": "2026-07-03T00:00:00Z"
+  },
+  {
+    "id": "PERSONA_ID_STRATEGIST",
+    "slug": "strategist",
+    "name": "Strategist",
+    "version": "4.1",
+    "file": "strategist.md",
+    "char_count": 936,
+    "exported": "2026-07-03T00:00:00Z"
+  },
+  {
+    "id": "PERSONA_ID_ARCHITECT",
+    "slug": "architect",
+    "name": "Architect",
+    "version": "3.2",
+    "file": "architect.md",
+    "char_count": 929,
+    "exported": "2026-07-03T00:00:00Z"
+  },
+  {
+    "id": "PERSONA_ID_TEACHER",
+    "slug": "teacher",
+    "name": "Teacher",
+    "version": "4.1",
+    "file": "teacher.md",
+    "char_count": 911,
+    "exported": "2026-07-03T00:00:00Z"
+  },
+  {
+    "id": "PERSONA_ID_LEVEL_UPPER",
+    "slug": "level-upper",
+    "name": "Level Upper",
+    "version": "2.1",
+    "file": "level-upper.md",
+    "char_count": 993,
+    "exported": "2026-07-03T00:00:00Z"
+  }
+]
