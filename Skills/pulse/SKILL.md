@@ -345,7 +345,8 @@ Wave 2 can start once D1.1 completes, even if D1.2 is still running.
   "title": "Build Title",
   "build_type": "code_build",
   "status": "pending",
-  "model": "anthropic:claude-sonnet-4-20250514",
+  "model": "inherit",
+  "max_total_spawns": 0,
   "launch_mode": "orchestrated|manual|jettison",
   "delegate_only": false,
   "first_wins": false,
@@ -503,13 +504,52 @@ python3 Skills/pulse/scripts/pulse.py tick <slug>
 
 every 3-5 minutes using your own scheduler.
 
+**Read before scheduling.** A scheduled tick is itself a billed agent session,
+and every Drop it spawns is another full session. Before handing a build to a
+recurring automation:
+
+1. Tick the first wave manually and watch it complete cleanly.
+2. Confirm the build's model policy (see *Model and Spend Policy*).
+3. Check your Zo billing balance; do not launch multi-hour builds near $0.
+4. Make the automation's instruction stop itself when `pulse.py status <slug>`
+   reports `blocked`, `stopped`, or `complete`. Pulse will refuse to spawn in
+   those states, but the automation session itself still costs money each time
+   it fires.
+
+### Model and Spend Policy
+
+- **No hardcoded model.** Drops inherit the workspace's default model unless
+  `meta.json["model"]` or the `ZO_ASK_MODEL_NAME` env var sets an explicit
+  override. `"inherit"` (or omitting the key) means "use whatever the workspace
+  default is." Provider connection ids (`byok:...`) are workspace-specific and
+  must never be committed to shared code.
+- **No silent fallback.** If an explicit model fails, the Drop fails. Pulse no
+  longer re-issues the same prompt on a different model.
+- **Concurrency cap.** `/zo/ask` allows 5 concurrent sessions per workspace.
+  Pulse spawns at most `PULSE_MAX_CONCURRENT_SPAWNS` (default 3) Drops at once
+  and defers the rest to later ticks instead of firing a whole wave into 429s.
+- **Total spawn ceiling.** A build may spawn at most
+  `meta.max_total_spawns` (or `PULSE_MAX_TOTAL_SPAWNS`; default
+  `3 x number of drops`) sessions in its lifetime, including retries. Hitting
+  the ceiling blocks the build.
+- **Non-retryable failures block immediately.** HTTP 402 (out of credits),
+  401/403 (auth), and missing model config set the build to `blocked`. Ticks
+  then no-op until you run `pulse.py resume <slug>`.
+
 ### Recovery Behavior
 
-Pulse recovery is handled in the orchestration loop:
+Pulse recovery is handled inline in the tick loop (`assess_and_recover`):
 
-- dead/failed drops are assessed during tick cycles
-- retry counts are tracked in `meta.json`
-- recovery actions are logged to `N5/builds/<slug>/RECOVERY_LOG.jsonl`
+- **R0** non-retryable (402/401/403/model config) → build `blocked`, no retry
+- **R1** dead (timeout) → auto-retry while `retry_count < max_auto_retries` (default 2)
+- **R2** transient spawn error (429, 5xx, connection) → auto-retry under the same cap
+- **R3** content/logic error → escalate for judgment
+- **R4** whole wave dead with retries exhausted → build `blocked`
+- **R5** stale build → escalate
+- retries are subject to the concurrency cap and total spawn ceiling above
+- actions are logged to `N5/builds/<slug>/RECOVERY_LOG.jsonl`
+
+`pulse.py resume <slug>` clears a `blocked` state after you fix the cause.
 
 ## Learnings System
 

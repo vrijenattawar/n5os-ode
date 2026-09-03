@@ -203,6 +203,15 @@ def _load_calendar_config() -> Dict:
     return cfg
 
 
+def _zo_ask_body(prompt: str) -> dict:
+    """Build /zo/ask body; only pin a model when ZO_ASK_MODEL_NAME is set."""
+    body = {"input": prompt}
+    model = os.environ.get("ZO_ASK_MODEL_NAME", "").strip()
+    if model:
+        body["model_name"] = model
+    return body
+
+
 def _query_single_calendar(time_min: str, time_max: str, email: str) -> List[Dict]:
     """Query ONE Google Calendar by id for events in a time window via /zo/ask."""
     import re as _re, requests as _requests, json as _json
@@ -221,7 +230,7 @@ def _query_single_calendar(time_min: str, time_max: str, email: str) -> List[Dic
         resp = _requests.post(
             "https://api.zo.computer/zo/ask",
             headers={"authorization": zo_token, "content-type": "application/json"},
-            json={"input": prompt, "model_name": "byok:45dd42b2-641b-4eea-832b-7ec073b2cbae"},
+            json=_zo_ask_body(prompt),
             timeout=30,
         )
         if resp.status_code != 200:

@@ -1,13 +1,33 @@
 ---
 created: 2026-01-15
-last_edited: 2026-02-18
-version: 2.0
+last_edited: 2026-09-03
+version: 2.1
 provenance: sanitized
 ---
 
 # Changelog
 
 All notable changes to n5OS-Ode are documented here.
+
+## [2.3.1] - 2026-09-03
+
+### Fixed
+- **Pulse spend guards (incident: BYOK-connected workspace drained credits in <2h).**
+  Removed all hardcoded provider connection ids (`byok:...`) from `Skills/pulse/scripts/pulse.py`
+  and `Skills/meeting-ingestion/scripts/{pull,calendar_match}.py`. Drops now inherit the
+  workspace default model unless `meta.json["model"]` or `ZO_ASK_MODEL_NAME` sets an override.
+- Removed the silent fallback that re-ran a failed `byok:` spawn on Zo's default (metered) model.
+- Restored inline recovery in `tick` (dropped in PR #2) and the `meta=` pass-through on
+  `retry_drop`, so R1/R2 retries actually persist instead of being overwritten by the tick.
+- Added `PULSE_MAX_CONCURRENT_SPAWNS` (default 3) so a wave cannot fan out past the
+  5-concurrent `/zo/ask` limit and cascade into 429 -> retry -> 429.
+- Added a per-build total spawn ceiling (`meta.max_total_spawns` / `PULSE_MAX_TOTAL_SPAWNS`,
+  default 3x drop count) covering retries.
+- Added rule **R0**: HTTP 402 / 401 / 403 / missing model config now block the build
+  immediately instead of being auto-retried; blocked ticks are no-ops. `pulse.py resume`
+  clears `blocked`.
+- Added `Skills/pulse/scripts/test_spend_guards.py` (7 deterministic scenarios) and
+  documented the model/spend policy in `Skills/pulse/SKILL.md`.
 
 ## [2.3.0] - 2026-07-03
 

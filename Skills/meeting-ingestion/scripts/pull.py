@@ -20,13 +20,12 @@ import tempfile
 from pathlib import Path
 from datetime import datetime, UTC
 
-DEFAULT_ZO_ASK_MODEL = os.environ.get(
-    "ZO_ASK_MODEL",
-    "byok:c3c80408-cc27-4a87-b894-65ff059fb137",
-)
+import os
+
+# Optional explicit model override; empty means inherit the workspace default.
+DEFAULT_ZO_ASK_MODEL = os.environ.get("ZO_ASK_MODEL_NAME", "").strip() or None
 
 # Add N5/scripts to path for imports
-import os
 WORKSPACE = Path(os.environ.get("N5OS_WORKSPACE", "."))
 sys.path.insert(0, str(WORKSPACE / "N5/scripts"))
 
@@ -76,7 +75,7 @@ def call_zo_api(prompt: str) -> dict:
         },
         json={
             "input": prompt,
-            "model_name": DEFAULT_ZO_ASK_MODEL,
+            **({"model_name": DEFAULT_ZO_ASK_MODEL} if DEFAULT_ZO_ASK_MODEL else {}),
             "output_format": {
                 "type": "object",
                 "properties": {
