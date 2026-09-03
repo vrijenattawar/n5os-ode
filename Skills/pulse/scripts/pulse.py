@@ -60,7 +60,59 @@ DEFAULT_CIRCUIT_FAILURE_THRESHOLD = 3
 DEFAULT_CIRCUIT_COOLDOWN_SECONDS = 300
 DEFAULT_UPSTREAM_ADAPTER_TIMEOUT_SECONDS = 120
 ZO_API_URL = "https://api.zo.computer/zo/ask"
-DEFAULT_ZO_ASK_MODEL = os.environ.get("ZO_ASK_MODEL_NAME", "byok:8a1176d8-10bf-44e8-a25c-30329932843c")
+# Concurrency: /zo/ask allows 5 concurrent sessions per workspace. Cap below
+# that so interactive sessions and the tick itself keep headroom.
+DEFAULT_MAX_CONCURRENT_SPAWNS = int(os.environ.get("PULSE_MAX_CONCURRENT_SPAWNS", "3"))
+DEFAULT_MAX_TOTAL_SPAWNS = int(os.environ.get("PULSE_MAX_TOTAL_SPAWNS", "0"))  # 0 = derive from drop count
+DEFAULT_TOTAL_SPAWN_MULTIPLIER = 3  # total spawns per build <= drops * multiplier unless overridden
+
+# Model policy: never hardcode a model or provider id. Drops inherit the
+# workspace default model unless meta.json["model"] or ZO_ASK_MODEL_NAME sets
+# an explicit override. Inherit tokens mean "omit model_name".
+INHERIT_MODEL_TOKENS = {"", "inherit", "parent", "current", "ui", "host-default"}
+
+# Non-retryable spawn failures: retrying these can only burn more sessions.
+NON_RETRYABLE_SPAWN_SIGNALS = (
+    "api returned 402",
+    "add credits",
+    "insufficient credits",
+    "payment required",
+    "api returned 401",
+    "api returned 403",
+    "zo_client_identity_token",
+    "byok model config",
+    "was not found for this workspace",
+)
+
+
+def resolve_spawn_model(model: str | None) -> str | None:
+    """Return an explicit model override, or None to inherit the workspace default."""
+    candidate = (model or os.environ.get("ZO_ASK_MODEL_NAME") or "").strip()
+    if candidate.lower() in INHERIT_MODEL_TOKENS:
+        return None
+    return candidate
+
+
+def build_zo_ask_body(prompt: str, model: str | None = None) -> dict:
+    """Build a /zo/ask request body, omitting model_name when inheriting."""
+    body = {"input": prompt}
+    resolved = resolve_spawn_model(model)
+    if resolved:
+        body["model_name"] = resolved
+    return body
+
+
+def is_non_retryable_spawn_error(err: str) -> bool:
+    low = (err or "").lower()
+    return any(sig in low for sig in NON_RETRYABLE_SPAWN_SIGNALS)
+
+
+def max_total_spawns(meta: dict) -> int:
+    """Hard ceiling on spawn attempts for the whole build."""
+    override = int(meta.get("max_total_spawns") or 0) or DEFAULT_MAX_TOTAL_SPAWNS
+    if override > 0:
+        return override
+    return max(1, len(meta.get("drops", {}))) * DEFAULT_TOTAL_SPAWN_MULTIPLIER
 
 
 def get_upstream_integration(meta: dict, name: str) -> dict:
@@ -1215,7 +1267,7 @@ BRIEF:
 ---
 {brief_with_broadcasts}"""
     
-    request_body = {"input": full_prompt, "model_name": model or DEFAULT_ZO_ASK_MODEL}
+    request_body = build_zo_ask_body(full_prompt, model)
 
     print(f"[SPAWN] Spawning Drop {drop_id} via /zo/ask...")
 
@@ -1249,20 +1301,9 @@ BRIEF:
             or "internal error" in lowered
         )
 
-        if execution_error and model and str(model).startswith("byok:"):
-            print(f"[SPAWN] Provider-backed model failed for {drop_id}; retrying with default model")
-            fallback_body = {"input": full_prompt}
-            result = await do_request(fallback_body)
-            output_text = str(result.get("output", ""))
-            lowered = output_text.lower()
-            execution_error = (
-                output_text.startswith("Error:")
-                or "failed to authenticate" in lowered
-                or "oauth token has expired" in lowered
-                or "authentication_error" in lowered
-                or "internal error" in lowered
-            )
-
+        # No silent model fallback. If an explicit provider model fails, the
+        # drop fails and the operator decides; re-issuing the same prompt on a
+        # different (possibly metered) model doubles spend without consent.
         if execution_error:
             raise RuntimeError(f"Drop execution failed during spawn: {output_text[:500]}")
 
@@ -1335,6 +1376,16 @@ def _record_spawn_failure(slug: str, drop_id: str, error_message: str) -> None:
 
         _increment_spawn_failures(meta, now)
 
+        if is_non_retryable_spawn_error(error_message):
+            info["non_retryable"] = True
+            meta["status"] = "blocked"
+            meta["blocked_at"] = now
+            meta["blocked_reason"] = (
+                f"Non-retryable spawn failure on {drop_id} "
+                f"(credits/auth/model config): {error_message[:200]}"
+            )
+            print(f"[SPAWN_WORKER] {drop_id} non-retryable failure; build {slug} BLOCKED")
+
 
 def spawn_one(slug: str, drop_id: str, model: str = None) -> int:
     """Detached spawn worker. Does the blocking /zo/ask call and writes result to meta."""
@@ -1392,9 +1443,15 @@ def stop_build(slug: str):
 def resume_build(slug: str) -> bool:
     """Resume a stopped build."""
     meta = load_meta(slug)
-    if meta.get("status") != "stopped":
-        print(f"[ERROR] Build {slug} is not stopped (current: {meta.get('status')})")
+    if meta.get("status") not in ("stopped", "blocked"):
+        print(f"[ERROR] Build {slug} is not stopped/blocked (current: {meta.get('status')})")
         return False
+    if meta.get("status") == "blocked":
+        meta["unblocked_at"] = datetime.now(timezone.utc).isoformat()
+        meta["last_blocked_reason"] = meta.pop("blocked_reason", None)
+        meta["spawn_failures_consecutive"] = 0
+        for info in meta.get("drops", {}).values():
+            info.pop("non_retryable", None)
     checks_passed, checks = run_upstream_prestart_checks(slug, meta)
     if checks:
         meta["upstream_resume_checks"] = {
@@ -1815,6 +1872,11 @@ async def _tick_inner(slug: str, lease_holder: str):
         print(f"[PULSE] Build {slug} is stopped")
         return
 
+    if meta.get("status") == "blocked":
+        print(f"[PULSE] Build {slug} is BLOCKED: {meta.get('blocked_reason', 'unknown')}. "
+              "No spawns will occur until an operator resolves it and runs `resume`.")
+        return
+
     _heartbeat_tick_lease(slug, lease_holder)
     
     # 1. Check for new deposits from running Drops
@@ -1996,6 +2058,19 @@ async def _tick_inner(slug: str, lease_holder: str):
             info.pop("spawn_requested_at", None)
             broadcasts_updated = True
     
+    # 2c. Inline recovery (deterministic R1-R5). Runs before spawning so retries
+    # are subject to the same concurrency and total-spawn ceilings below.
+    recovery_actions = assess_and_recover(slug, meta=meta)
+    if recovery_actions:
+        broadcasts_updated = True
+        _heartbeat_tick_lease(slug, lease_holder)
+        print(f"[RECOVERY] Inline recovery actions: {len(recovery_actions)}")
+        if meta.get("status") == "blocked":
+            save_meta(slug, meta)
+            update_status_md(slug, meta)
+            print(f"[PULSE] Build {slug} blocked during inline recovery")
+            return
+
     # 3. Check for first-wins supersession
     if check_first_wins(slug, meta):
         broadcasts_updated = True
@@ -2025,6 +2100,13 @@ async def _tick_inner(slug: str, lease_holder: str):
             f"[CIRCUIT] Spawn circuit open until {circuit.get('open_until')} "
             f"({circuit.get('open_reason', 'no reason')}). Skipping auto-spawn this tick."
         )
+
+    in_flight = sum(
+        1 for d in meta.get("drops", {}).values()
+        if d.get("status") in ("running", "spawning")
+    )
+    total_spawns = int(meta.get("total_spawn_attempts", 0))
+    spawn_ceiling = max_total_spawns(meta)
 
     for drop_id in ready:
         try:
@@ -2058,9 +2140,28 @@ async def _tick_inner(slug: str, lease_holder: str):
             else:
                 if circuit_open:
                     continue
-                model = meta.get("model")
+                if in_flight >= DEFAULT_MAX_CONCURRENT_SPAWNS:
+                    print(
+                        f"[THROTTLE] {drop_id} deferred: {in_flight} drops in flight "
+                        f"(cap {DEFAULT_MAX_CONCURRENT_SPAWNS}; host allows 5 concurrent /zo/ask)"
+                    )
+                    continue
+                if total_spawns >= spawn_ceiling:
+                    meta["status"] = "blocked"
+                    meta["blocked_at"] = datetime.now(timezone.utc).isoformat()
+                    meta["blocked_reason"] = (
+                        f"Total spawn ceiling reached ({total_spawns}/{spawn_ceiling}). "
+                        "Raise meta.max_total_spawns or PULSE_MAX_TOTAL_SPAWNS to continue."
+                    )
+                    print(f"[CEILING] {meta['blocked_reason']}")
+                    broadcasts_updated = True
+                    break
+                model = resolve_spawn_model(meta.get("model"))
                 tracking_id = f"spawn_worker_{slug}_{drop_id}_{int(datetime.now(timezone.utc).timestamp())}"
                 pid = launch_spawn_worker(slug, drop_id, model)
+                in_flight += 1
+                total_spawns += 1
+                meta["total_spawn_attempts"] = total_spawns
                 info["status"] = "running"
                 info["started_at"] = datetime.now(timezone.utc).isoformat()
                 info["conversation_id"] = tracking_id
@@ -2164,14 +2265,19 @@ Progress: {complete}/{len(drops)} ({int(complete/len(drops)*100) if drops else 0
 """)
 
 
-def retry_drop(slug: str, drop_id: str, reason: str = None):
+def retry_drop(slug: str, drop_id: str, reason: str = None, meta: dict | None = None):
     """Reset a Drop to pending, archive old deposit, optionally appends retry reason to brief.
     
     Based on Theo's lesson: If output is bad, don't keep appending corrections.
     Revert and restart with corrected input. This gives the model a clean slate
     with better context rather than compounding errors.
+
+    When `meta` is supplied (inline recovery during tick), mutate it in place and
+    let the caller persist; otherwise load/save meta here (CLI usage).
     """
-    meta = load_meta(slug)
+    persist_changes = meta is None
+    if meta is None:
+        meta = load_meta(slug)
     
     if drop_id not in meta.get("drops", {}):
         print(f"[ERROR] Drop {drop_id} not found in build {slug}")
@@ -2239,8 +2345,9 @@ def retry_drop(slug: str, drop_id: str, reason: str = None):
         except Exception as e:
             print(f"[RETRY] Warning: Could not update brief: {e}")
     
-    save_meta(slug, meta)
-    update_status_md(slug, meta)
+    if persist_changes:
+        save_meta(slug, meta)
+        update_status_md(slug, meta)
     
     print(f"[RETRY] {drop_id} reset from '{old_status}' to 'pending' (attempt {drop_info['retry_count'] + 1})")
     print(f"[RETRY] Run 'pulse tick {slug}' or wait for the next scheduled tick")
@@ -2307,7 +2414,7 @@ def _get_recovery_config(meta: dict) -> dict:
 def _classify_failure(drop_id: str, info: dict, slug: str) -> str:
     """Classify a failure type for recovery rule matching.
 
-    Returns one of: 'dead_timeout', 'spawn_error', 'content_error', 'unknown'
+    Returns one of: 'non_retryable', 'dead_timeout', 'spawn_error', 'content_error', 'unknown'
     """
     status = info.get("status", "")
 
@@ -2317,7 +2424,10 @@ def _classify_failure(drop_id: str, info: dict, slug: str) -> str:
     reason = info.get("failure_reason", "") or ""
     reason_lower = reason.lower()
 
-    spawn_signals = ["spawn error", "api returned", "timeout", "connection", "zo_client_identity_token"]
+    if info.get("non_retryable") or is_non_retryable_spawn_error(reason):
+        return "non_retryable"
+
+    spawn_signals = ["spawn error", "api returned", "timeout", "connection"]
     if any(sig in reason_lower for sig in spawn_signals):
         return "spawn_error"
 
@@ -2433,6 +2543,26 @@ def assess_and_recover(slug: str, meta: dict = None, dry_run: bool = False) -> l
         retry_count = info.get("retry_count", 0)
         failure_type = _classify_failure(drop_id, info, slug)
 
+        # R0: Non-retryable (402 credits, 401/403 auth, missing model config).
+        # Retrying cannot succeed and each attempt is a billed session.
+        if info.get("non_retryable") or is_non_retryable_spawn_error(info.get("failure_reason", "")):
+            action = {
+                "drop_id": drop_id,
+                "rule": "R0",
+                "action": "escalate",
+                "failure_type": "non_retryable",
+                "reason": info.get("failure_reason", "Non-retryable spawn failure"),
+            }
+            if not dry_run:
+                info["non_retryable"] = True
+                meta["status"] = "blocked"
+                meta["blocked_at"] = now.isoformat()
+                meta["blocked_reason"] = action["reason"]
+            _log_recovery_action(slug, action)
+            actions.append(action)
+            print(f"[RECOVERY] R0: {drop_id} non-retryable — build BLOCKED")
+            continue
+
         # R1: Dead timeout — auto-retry if under limit
         if failure_type == "dead_timeout" and retry_count < max_retries:
             action = {
@@ -2449,7 +2579,7 @@ def assess_and_recover(slug: str, meta: dict = None, dry_run: bool = False) -> l
                     "Focus on completing the core requirement first. "
                     "If blocked, write a deposit with status 'blocked' immediately."
                 )
-                retry_drop(slug, drop_id, reason=retry_reason)
+                retry_drop(slug, drop_id, reason=retry_reason, meta=meta)
                 info["auto_retried_at"] = now.isoformat()
                 info["auto_retry_reason"] = action["reason"]
                 info["recovery_source"] = "tick_auto"
@@ -2473,7 +2603,7 @@ def assess_and_recover(slug: str, meta: dict = None, dry_run: bool = False) -> l
                     "Previous attempt failed during spawn (transient API error). "
                     "This is likely a temporary issue. Proceed normally."
                 )
-                retry_drop(slug, drop_id, reason=retry_reason)
+                retry_drop(slug, drop_id, reason=retry_reason, meta=meta)
                 info["auto_retried_at"] = now.isoformat()
                 info["auto_retry_reason"] = action["reason"]
                 info["recovery_source"] = "tick_auto"
